@@ -1,10 +1,16 @@
-
 import { useState } from "react";
 import AppLayout from "@/components/layout/AppLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AyuChat from "@/components/ayu/AyuChat";
 import SymptomCard from "@/components/symptoms/SymptomCard";
-import { Brain, Thermometer, Lungs, Stethoscope, Activity, HeartPulse } from "lucide-react";
+import { 
+  Brain, 
+  Thermometer, 
+  Stethoscope, 
+  Activity, 
+  HeartPulse, 
+  Frown 
+} from "lucide-react";
 
 const Symptoms = () => {
   const [activeTab, setActiveTab] = useState("chat");
@@ -47,7 +53,7 @@ const Symptoms = () => {
         "Try honey and ginger tea for cough relief"
       ],
       whenToSeeDoctor: "If symptoms last more than 10 days, you experience unusually severe symptoms, or you have a fever above 101.3°F (38.5°C) for adults.",
-      icon: <Lungs />
+      icon: <Frown />
     },
     {
       title: "Digestive Issues",
