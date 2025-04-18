@@ -8,6 +8,8 @@ import { MapPin, Phone, Clock, Truck, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import PharmacyContact from "@/components/pharmacies/PharmacyContact";
+import DeliveryEstimator from "@/components/pharmacies/DeliveryEstimator";
 
 interface Pharmacy {
   id: number;
@@ -25,6 +27,9 @@ const Pharmacies = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showDeliveryOnly, setShowDeliveryOnly] = useState(false);
   const [show24HoursOnly, setShow24HoursOnly] = useState(false);
+  const [selectedPharmacy, setSelectedPharmacy] = useState<Pharmacy | null>(null);
+  const [showContactModal, setShowContactModal] = useState(false);
+  const [showDeliveryModal, setShowDeliveryModal] = useState(false);
 
   // Sample data - in a real app this would come from an API
   const pharmacies: Pharmacy[] = [
@@ -111,6 +116,16 @@ const Pharmacies = () => {
     
     return matchesSearch && matchesDelivery && matches24Hours;
   });
+
+  const handleContact = (pharmacy: Pharmacy) => {
+    setSelectedPharmacy(pharmacy);
+    setShowContactModal(true);
+  };
+
+  const handleDeliveryEstimate = (pharmacy: Pharmacy) => {
+    setSelectedPharmacy(pharmacy);
+    setShowDeliveryModal(true);
+  };
 
   return (
     <AppLayout>
@@ -199,9 +214,32 @@ const Pharmacies = () => {
                     )}
                   </div>
                   
-                  <div className="mt-4 flex justify-between">
-                    <Button variant="outline" size="sm">View on Map</Button>
-                    <Button size="sm">Contact</Button>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleContact(pharmacy)}
+                    >
+                      Contact
+                    </Button>
+                    
+                    {pharmacy.delivers && (
+                      <Button 
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => handleDeliveryEstimate(pharmacy)}
+                      >
+                        Check Delivery Time
+                      </Button>
+                    )}
+                    
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      className="ml-auto"
+                    >
+                      View on Map
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -213,6 +251,24 @@ const Pharmacies = () => {
           )}
         </div>
       </div>
+      
+      {selectedPharmacy && (
+        <>
+          <PharmacyContact
+            isOpen={showContactModal}
+            onClose={() => setShowContactModal(false)}
+            pharmacyName={selectedPharmacy.name}
+            pharmacyPhone={selectedPharmacy.phone}
+          />
+          
+          <DeliveryEstimator
+            isOpen={showDeliveryModal}
+            onClose={() => setShowDeliveryModal(false)}
+            pharmacyName={selectedPharmacy.name}
+            distance={selectedPharmacy.distance}
+          />
+        </>
+      )}
     </AppLayout>
   );
 };

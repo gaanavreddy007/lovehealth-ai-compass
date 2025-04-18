@@ -7,6 +7,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MapPin, Phone, Clock, Star, Filter } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import BookAppointmentModal from "@/components/providers/BookAppointmentModal";
+import ProviderMap from "@/components/providers/ProviderMap";
 
 interface Provider {
   id: number;
@@ -24,6 +26,9 @@ interface Provider {
 const Providers = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<string>("all");
+  const [bookingProvider, setBookingProvider] = useState<Provider | null>(null);
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [showDetailsId, setShowDetailsId] = useState<number | null>(null);
 
   // Sample data - in a real app this would come from an API
   const providers: Provider[] = [
@@ -131,6 +136,15 @@ const Providers = () => {
     return stars;
   };
 
+  const handleBookAppointment = (provider: Provider) => {
+    setBookingProvider(provider);
+    setShowBookingModal(true);
+  };
+
+  const handleViewDetails = (id: number) => {
+    setShowDetailsId(showDetailsId === id ? null : id);
+  };
+
   return (
     <AppLayout>
       <div className="ayu-container py-12">
@@ -220,9 +234,26 @@ const Providers = () => {
                     </div>
                   </div>
                   
+                  {showDetailsId === provider.id && (
+                    <div className="mt-4 animate-fade-in">
+                      <ProviderMap address={provider.address} area={provider.area} />
+                    </div>
+                  )}
+                  
                   <div className="mt-4 flex justify-between">
-                    <Button variant="outline" size="sm">View Details</Button>
-                    <Button size="sm">Book Appointment</Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleViewDetails(provider.id)}
+                    >
+                      {showDetailsId === provider.id ? "Hide Details" : "View Details"}
+                    </Button>
+                    <Button 
+                      size="sm"
+                      onClick={() => handleBookAppointment(provider)}
+                    >
+                      Book Appointment
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -234,6 +265,14 @@ const Providers = () => {
           )}
         </div>
       </div>
+      
+      {bookingProvider && (
+        <BookAppointmentModal 
+          isOpen={showBookingModal} 
+          onClose={() => setShowBookingModal(false)} 
+          providerName={bookingProvider.name} 
+        />
+      )}
     </AppLayout>
   );
 };
