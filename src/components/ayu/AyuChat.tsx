@@ -45,23 +45,53 @@ const AyuChat = () => {
   }, [messages]);
 
   const generateResponse = (userMessage: string): Promise<string> => {
-    // This would be replaced with a real AI backend in production
     return new Promise((resolve) => {
-      const responses = [
-        "I understand how you're feeling. What symptoms are you experiencing?",
-        "I'm here to help. Could you tell me more about when these symptoms started?",
-        "Based on what you've shared, this could be related to a few different conditions. Let's explore some possibilities.",
-        "Taking care of your health is important. Would you like me to suggest some home remedies?",
-        "It might be helpful to consult with a healthcare provider. Would you like me to find specialists nearby?",
-        "Rest and proper hydration can help with these symptoms. Would you like more specific advice?",
-        "I'm here to support you on your health journey. Let's work on this together.",
-        "Traditional remedies include turmeric milk for inflammation. Would you like to know more?"
-      ];
+      const lowerMessage = userMessage.toLowerCase();
       
-      // Simulate typing delay
+      // Advanced response mapping
+      const responseMap: { [key: string]: string[] } = {
+        'headache': [
+          "Headaches can be caused by stress, dehydration, or tension. Have you been drinking enough water?",
+          "Try applying a cool compress to your forehead and resting in a quiet, dark room.",
+          "Gentle massage with peppermint oil can help alleviate headache symptoms."
+        ],
+        'fever': [
+          "A fever is your body's way of fighting infections. Rest and hydration are key.",
+          "Monitor your temperature. If it's above 103°F, you should consult a healthcare provider.",
+          "Tulsi (holy basil) tea can help support your immune system during a fever."
+        ],
+        'tired': [
+          "Fatigue can be a sign of many things. Are you getting enough sleep?",
+          "Consider practicing gentle yoga or meditation to restore energy.",
+          "Ashwagandha supplements can help boost energy levels naturally."
+        ],
+        'pain': [
+          "Pain is your body's signal that something needs attention. Can you describe the pain more specifically?",
+          "Ayurvedic treatments like turmeric and ginger can help reduce inflammation.",
+          "Gentle stretching and rest might provide some relief."
+        ]
+      };
+
+      // Fallback responses for general conversation
+      const fallbackResponses = [
+        "Could you tell me more about your symptoms?",
+        "I'm here to help you understand your health better.",
+        "Every symptom tells a story. Let's explore what your body is communicating.",
+        "Health is a holistic journey. Let's discuss how you're feeling in detail."
+      ];
+
+      // Find matching responses
+      const matchedResponses = Object.entries(responseMap)
+        .filter(([keyword]) => lowerMessage.includes(keyword))
+        .flatMap(([, responses]) => responses);
+
+      // Resolve with a response
       setTimeout(() => {
-        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-        resolve(randomResponse);
+        const response = matchedResponses.length > 0 
+          ? matchedResponses[Math.floor(Math.random() * matchedResponses.length)]
+          : fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
+        
+        resolve(response);
       }, 1500);
     });
   };
