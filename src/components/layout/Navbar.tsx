@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Menu, X, Heart, MapPin, Pill } from "lucide-react";
@@ -18,7 +17,6 @@ const Navbar = () => {
             <span className="text-xl font-bold gradient-text">LoveHealth AI</span>
           </Link>
 
-          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
             <Link to="/symptoms" className="flex items-center space-x-2 text-foreground/80 hover:text-ayurveda-deepblue transition-colors">
               <Heart size={18} />
@@ -32,12 +30,13 @@ const Navbar = () => {
               <Pill size={18} />
               <span>Pharmacies</span>
             </Link>
-            <Button variant="outline" className="border-ayurveda-sage text-ayurveda-deepblue hover:bg-ayurveda-sage/10">
-              Login
-            </Button>
+            <Link to="/login">
+              <Button variant="outline" className="border-ayurveda-sage text-ayurveda-deepblue hover:bg-ayurveda-sage/10">
+                Login
+              </Button>
+            </Link>
           </div>
 
-          {/* Mobile Navigation Toggle */}
           <div className="md:hidden">
             <Button variant="ghost" size="icon" onClick={() => setIsMenuOpen(!isMenuOpen)}>
               {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -45,7 +44,6 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Mobile Navigation Menu */}
         {isMenuOpen && (
           <div className="md:hidden mt-4 pb-4 space-y-4 animate-fade-in">
             <Link to="/symptoms" className="block py-2 px-4 rounded-md hover:bg-muted">
@@ -66,11 +64,11 @@ const Navbar = () => {
                 <span>Pharmacies</span>
               </div>
             </Link>
-            <div className="pt-2">
+            <Link to="/login" className="block py-2 px-4">
               <Button variant="outline" className="w-full border-ayurveda-sage text-ayurveda-deepblue hover:bg-ayurveda-sage/10">
                 Login
               </Button>
-            </div>
+            </Link>
           </div>
         )}
       </div>
