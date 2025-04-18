@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { CornerDownLeft, Smile, Paperclip, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,6 +19,7 @@ const AyuChat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isAyuTyping, setIsAyuTyping] = useState(false);
+  const [conversationContext, setConversationContext] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -28,7 +28,7 @@ const AyuChat = () => {
     setTimeout(() => {
       const greeting: Message = {
         id: "greeting",
-        content: "Namaste! I'm Ayu, your health companion. How are you feeling today?",
+        content: "Namaste! I'm Ayu, your AI-powered Ayurvedic health companion. How can I assist you with your health today?",
         sender: "ayu",
         timestamp: new Date()
       };
@@ -44,53 +44,72 @@ const AyuChat = () => {
     scrollToBottom();
   }, [messages]);
 
+  const analyzeSymptoms = (message: string): string[] => {
+    const symptoms = [
+      'headache', 'fever', 'cough', 'cold', 'pain', 'tired', 'stress', 'anxiety',
+      'sleep', 'digestion', 'nausea', 'breathing', 'joint', 'muscle', 'skin'
+    ];
+    return symptoms.filter(symptom => message.toLowerCase().includes(symptom));
+  };
+
   const generateResponse = (userMessage: string): Promise<string> => {
     return new Promise((resolve) => {
       const lowerMessage = userMessage.toLowerCase();
+      const detectedSymptoms = analyzeSymptoms(userMessage);
       
-      // Advanced response mapping
+      // Advanced response mapping with Ayurvedic context
       const responseMap: { [key: string]: string[] } = {
         'headache': [
-          "Headaches can be caused by stress, dehydration, or tension. Have you been drinking enough water?",
-          "Try applying a cool compress to your forehead and resting in a quiet, dark room.",
-          "Gentle massage with peppermint oil can help alleviate headache symptoms."
+          "I notice you're experiencing a headache. In Ayurveda, headaches can be caused by imbalances in Vata (stress), Pitta (inflammation), or Kapha (congestion). Have you been experiencing any stress lately?",
+          "For headache relief, I recommend: 1) Massaging your temples with diluted peppermint oil 2) Drinking ginger tea with honey 3) Practicing deep breathing in a quiet, dark room. Would you like more specific remedies?",
+          "Besides the headache, are you experiencing any sensitivity to light or sound? This will help me understand if it's a Vata, Pitta, or Kapha imbalance."
         ],
         'fever': [
-          "A fever is your body's way of fighting infections. Rest and hydration are key.",
-          "Monitor your temperature. If it's above 103°F, you should consult a healthcare provider.",
-          "Tulsi (holy basil) tea can help support your immune system during a fever."
+          "A fever is your body's natural defense mechanism. From an Ayurvedic perspective, this indicates a Pitta (heat) imbalance. Are you also experiencing thirst or warmth in your body?",
+          "I recommend: 1) Drinking cooling herbs like holy basil (tulsi) tea 2) Light fasting or easily digestible foods 3) Rest and meditation. Would you like me to elaborate on any of these?",
+          "Have you noticed any patterns with your fever, like does it increase at certain times of the day? This could help us understand the underlying dosha imbalance."
         ],
         'tired': [
-          "Fatigue can be a sign of many things. Are you getting enough sleep?",
-          "Consider practicing gentle yoga or meditation to restore energy.",
-          "Ashwagandha supplements can help boost energy levels naturally."
+          "Fatigue in Ayurveda often indicates an imbalance in your vital energy (prana). Could you tell me about your sleep patterns and daily routine?",
+          "Consider these Ayurvedic recommendations: 1) Taking Ashwagandha supplement 2) Oil pulling in the morning 3) Practicing gentle yoga. Would you like a detailed routine?",
+          "Is your fatigue worse at certain times of day? This could help us identify which dosha needs balancing."
         ],
-        'pain': [
-          "Pain is your body's signal that something needs attention. Can you describe the pain more specifically?",
-          "Ayurvedic treatments like turmeric and ginger can help reduce inflammation.",
-          "Gentle stretching and rest might provide some relief."
+        'stress': [
+          "Stress in Ayurveda is often related to Vata imbalance. Let's work on grounding practices. How long have you been feeling this way?",
+          "Here are some immediate Ayurvedic stress-relief practices: 1) Abhyanga (self-massage) with warm sesame oil 2) Pranayama breathing 3) Drinking warm milk with nutmeg before bed. Shall we explore these further?",
+          "Are you also experiencing any physical symptoms with the stress? This will help me suggest more targeted remedies."
         ]
       };
 
-      // Fallback responses for general conversation
+      // Context-aware fallback responses
       const fallbackResponses = [
-        "Could you tell me more about your symptoms?",
-        "I'm here to help you understand your health better.",
-        "Every symptom tells a story. Let's explore what your body is communicating.",
-        "Health is a holistic journey. Let's discuss how you're feeling in detail."
+        "I'm analyzing your symptoms through an Ayurvedic lens. Could you tell me more about when these symptoms started?",
+        "In Ayurveda, we look at the whole person, not just symptoms. How's your daily routine and diet been lately?",
+        "Understanding your prakriti (body constitution) will help me give better advice. Do you typically run warm or cool?",
+        "Let's explore your symptoms together. Are they worse at any particular time of day?",
+        "Ayurveda teaches us that health is a balance of mind, body, and spirit. How's your emotional well-being lately?"
       ];
 
-      // Find matching responses
-      const matchedResponses = Object.entries(responseMap)
-        .filter(([keyword]) => lowerMessage.includes(keyword))
-        .flatMap(([, responses]) => responses);
-
-      // Resolve with a response
-      setTimeout(() => {
-        const response = matchedResponses.length > 0 
-          ? matchedResponses[Math.floor(Math.random() * matchedResponses.length)]
-          : fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
+      // Build contextual response
+      let response: string;
+      if (detectedSymptoms.length > 0) {
+        const relevantResponses = detectedSymptoms
+          .map(symptom => responseMap[symptom])
+          .filter(Boolean)
+          .flat();
         
+        response = relevantResponses.length > 0
+          ? relevantResponses[Math.floor(Math.random() * relevantResponses.length)]
+          : fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
+      } else {
+        response = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
+      }
+
+      // Add conversation memory
+      setConversationContext(prev => [...prev, userMessage]);
+      
+      // Simulate AI processing time
+      setTimeout(() => {
         resolve(response);
       }, 1500);
     });
