@@ -184,12 +184,12 @@ const AyuChat = () => {
   };
 
   return (
-    <div className="flex flex-col h-full border rounded-xl shadow-sm overflow-hidden bg-white/50 backdrop-blur-sm">
+    <div className="flex flex-col h-full border rounded-xl shadow-sm overflow-hidden bg-white/50 backdrop-blur-sm" role="main" aria-label="AI Health Assistant Chat">
       <div className="p-4 border-b bg-white/80 backdrop-blur-sm flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <AyuAvatar size="sm" />
           <div>
-            <h3 className="font-medium">Ayu</h3>
+            <h3 className="font-medium" id="ayu-chat-title">Ayu</h3>
             <p className="text-xs text-muted-foreground">Your Health Companion</p>
           </div>
         </div>
@@ -197,6 +197,7 @@ const AyuChat = () => {
           <LanguageSelector 
             currentLanguage={language}
             onLanguageChange={handleLanguageChange}
+            aria-label="Select language"
           />
         </div>
       </div>
@@ -205,6 +206,10 @@ const AyuChat = () => {
         className="flex-1 p-4 overflow-y-auto"
         ref={scrollAreaViewportRef}
         style={{ height: '100%', maxHeight: 'calc(100% - 130px)' }}
+        role="log"
+        aria-live="polite"
+        aria-relevant="additions text"
+        aria-label="Chat messages"
       >
         <div className="space-y-4">
           {messages.map((message) => (
@@ -214,7 +219,6 @@ const AyuChat = () => {
               <UserMessage key={message.id} content={message.content} />
             )
           ))}
-          
           {isAyuTyping && (
             <div className="flex items-center space-x-2 animate-fade-in">
               <AyuAvatar size="sm" isThinking={true} />
@@ -236,6 +240,7 @@ const AyuChat = () => {
           handleSubmit(e);
         }} 
         className="border-t p-4 bg-white/60 backdrop-blur-sm"
+        aria-label="Send a message to Ayu"
       >
         <div className="flex space-x-2">
           <Input
@@ -245,11 +250,14 @@ const AyuChat = () => {
             onKeyDown={handleKeyDown}
             placeholder="Type your health concern..."
             className="flex-1"
+            aria-label="Type your health concern"
+            aria-describedby="ayu-chat-title"
           />
           <Button 
             type="button" 
             onClick={(e) => handleSubmit(e as unknown as React.FormEvent)} 
             size="icon"
+            aria-label="Send message"
           >
             <CornerDownLeft size={18} />
           </Button>

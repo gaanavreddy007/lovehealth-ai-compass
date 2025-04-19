@@ -21,6 +21,7 @@ const Contact = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    window.scrollTo({ top: 0, behavior: "smooth" });
     setIsSubmitting(true);
 
     // Simulate form submission
@@ -44,7 +45,7 @@ const Contact = () => {
 
   return (
     <AppLayout>
-      <div className="ayu-container py-12">
+      <div className="ayu-container max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-12">
         <h1 className="text-3xl font-bold mb-2 text-ayurveda-deepblue">Contact Us</h1>
         <p className="text-muted-foreground mb-8">
           Have questions or feedback? We'd love to hear from you.
@@ -52,17 +53,18 @@ const Contact = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-2">
-            <Card>
+            <Card className="w-full max-w-2xl mx-auto" role="main" aria-label="Contact form">
               {isSubmitted ? (
                 <CardContent className="pt-6 flex flex-col items-center justify-center min-h-[400px] text-center">
                   <CheckCircle2 className="h-16 w-16 text-green-500 mb-4" />
-                  <h2 className="text-2xl font-semibold mb-2 text-ayurveda-deepblue">Thank You!</h2>
+                  <h2 className="text-2xl font-semibold mb-2 text-ayurveda-deepblue" id="contact-title">Thank You!</h2>
                   <p className="text-muted-foreground max-w-md mb-6">
                     Your message has been sent successfully. We'll get back to you as soon as possible.
                   </p>
                   <Button 
                     onClick={() => setIsSubmitted(false)}
-                    className="bg-ayurveda-deepblue hover:bg-ayurveda-deepblue/90"
+                    className="bg-ayurveda-deepblue hover:bg-ayurveda-deepblue/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ayurveda-terracotta transition-all"
+                    aria-label="Send another message"
                   >
                     Send Another Message
                   </Button>
@@ -70,77 +72,76 @@ const Contact = () => {
               ) : (
                 <>
                   <CardHeader>
-                    <CardTitle>Send Us a Message</CardTitle>
+                    <CardTitle id="contact-title">Send Us a Message</CardTitle>
                     <CardDescription>
                       Fill out the form below and we'll respond as soon as possible.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="name">Your Name</Label>
-                          <Input 
-                            id="name" 
-                            placeholder="Enter your name" 
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            required
-                            disabled={isSubmitting}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="email">Email Address</Label>
-                          <Input 
-                            id="email" 
-                            type="email" 
-                            placeholder="Enter your email" 
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                            disabled={isSubmitting}
-                          />
-                        </div>
+                    <form onSubmit={handleSubmit} className="space-y-4" aria-labelledby="contact-title" role="form">
+                      <div>
+                        <Label htmlFor="name" className="text-sm font-medium">Your Name</Label>
+                        <Input 
+                          id="name" 
+                          type="text" 
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          required
+                          aria-required="true"
+                          aria-label="Your name"
+                          className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-ayurveda-terracotta transition-all"
+                        />
                       </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="subject">Subject</Label>
+                      <div>
+                        <Label htmlFor="email" className="text-sm font-medium">Email Address</Label>
+                        <Input 
+                          id="email" 
+                          type="email" 
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          required
+                          aria-required="true"
+                          aria-label="Your email address"
+                          className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-ayurveda-terracotta transition-all"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="subject" className="text-sm font-medium">Subject</Label>
                         <Select 
                           value={subject} 
                           onValueChange={setSubject}
-                          disabled={isSubmitting}
+                          aria-label="Subject"
                         >
-                          <SelectTrigger>
+                          <SelectTrigger className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-ayurveda-terracotta transition-all">
                             <SelectValue placeholder="Select a subject" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="general">General Inquiry</SelectItem>
-                            <SelectItem value="support">Technical Support</SelectItem>
-                            <SelectItem value="feedback">Feedback</SelectItem>
-                            <SelectItem value="partnership">Partnership Opportunity</SelectItem>
-                            <SelectItem value="other">Other</SelectItem>
+                            <SelectItem value="General">General</SelectItem>
+                            <SelectItem value="Feedback">Feedback</SelectItem>
+                            <SelectItem value="Support">Support</SelectItem>
+                            <SelectItem value="Medical">Medical</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="message">Message</Label>
+                      <div>
+                        <Label htmlFor="message" className="text-sm font-medium">Message</Label>
                         <Textarea 
                           id="message" 
-                          placeholder="Type your message here" 
-                          rows={6}
                           value={message}
                           onChange={(e) => setMessage(e.target.value)}
                           required
-                          disabled={isSubmitting}
+                          aria-required="true"
+                          aria-label="Your message"
+                          className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-ayurveda-terracotta transition-all"
                         />
                       </div>
-                      
                       <Button 
                         type="submit" 
-                        className="w-full bg-ayurveda-deepblue hover:bg-ayurveda-deepblue/90"
+                        className="w-full bg-ayurveda-deepblue hover:bg-ayurveda-deepblue/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ayurveda-terracotta transition-all flex items-center justify-center gap-2" 
+                        aria-label="Send message" 
                         disabled={isSubmitting}
                       >
+                        {isSubmitting && <span className="loader h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" aria-hidden="true"></span>}
                         {isSubmitting ? "Sending..." : "Send Message"}
                       </Button>
                     </form>
@@ -208,7 +209,7 @@ const Contact = () => {
                   <p className="text-xs text-muted-foreground">Yes, but please schedule an appointment first by contacting us via email or phone.</p>
                 </div>
                 
-                <Button asChild variant="outline" size="sm" className="w-full mt-2">
+                <Button asChild variant="outline" size="sm" className="w-full mt-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ayurveda-terracotta transition-all" aria-label="View all FAQs">
                   <Link to="/faq">
                     <MessageSquare className="mr-2 h-4 w-4" />
                     View All FAQs

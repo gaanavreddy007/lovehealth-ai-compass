@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Heart, MapPin, Pill, ChevronRight } from "lucide-react";
@@ -46,41 +45,39 @@ const Index = () => {
   return (
     <AppLayout>
       {/* Hero section */}
-      <section className="relative bg-gradient-to-b from-ayurveda-cream/40 to-background pt-16 pb-24 md:pt-24 md:pb-32">
-        <div className="ayu-container">
-          <div className="flex flex-col md:flex-row items-center">
-            <div className="md:w-1/2 space-y-6 text-center md:text-left">
-              <h1 className="text-4xl md:text-5xl font-bold text-ayurveda-deepblue">
-                Meet <span className="gradient-text">Ayu</span>, Your Health Companion
-              </h1>
-              <p className="text-lg text-muted-foreground max-w-md mx-auto md:mx-0">
-                A compassionate AI health assistant for Bengaluru residents, blending modern healthcare with traditional wisdom.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-                <Button asChild size="lg" className="bg-ayurveda-deepblue hover:bg-ayurveda-deepblue/90 text-white">
-                  <Link to="/symptoms">
-                    Talk to Ayu
-                    <ChevronRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-                <Button asChild size="lg" variant="outline" className="border-ayurveda-sage text-ayurveda-deepblue hover:bg-ayurveda-sage/10">
-                  <Link to="/about">Learn More</Link>
-                </Button>
-              </div>
-              <p className="text-xs text-muted-foreground/70 max-w-md">
-                Not a substitute for professional medical advice. Always consult qualified healthcare providers.
-              </p>
+      <section className="relative bg-gradient-to-b from-ayurveda-cream/40 to-background pt-16 pb-24 md:pt-24 md:pb-32 ayu-container max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+        <div className="flex flex-col md:flex-row items-center">
+          <div className="md:w-1/2 space-y-6 text-center md:text-left">
+            <h1 className="text-4xl md:text-5xl font-bold text-ayurveda-deepblue">
+              Meet <span className="gradient-text">Ayu</span>, Your Health Companion
+            </h1>
+            <p className="text-lg text-muted-foreground max-w-md mx-auto md:mx-0">
+              A compassionate AI health assistant for Bengaluru residents, blending modern healthcare with traditional wisdom.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+              <Button asChild size="lg" className="bg-ayurveda-deepblue hover:bg-ayurveda-deepblue/90 text-white">
+                <Link to="/symptoms">
+                  Talk to Ayu
+                  <ChevronRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="border-ayurveda-sage text-ayurveda-deepblue hover:bg-ayurveda-sage/10">
+                <Link to="/about">Learn More</Link>
+              </Button>
             </div>
-            <div className="md:w-1/2 flex justify-center md:justify-end mt-10 md:mt-0">
-              <div className="relative">
-                <div className="absolute -z-10 w-64 h-64 bg-gradient-to-r from-ayurveda-terracotta/20 to-ayurveda-sage/20 rounded-full blur-3xl"></div>
-                <AyuAvatar 
-                  size="lg" 
-                  className="float-animation" 
-                  isAnimating={isAyuAnimating}
-                  showGreeting={showGreeting}
-                />
-              </div>
+            <p className="text-xs text-muted-foreground/70 max-w-md">
+              Not a substitute for professional medical advice. Always consult qualified healthcare providers.
+            </p>
+          </div>
+          <div className="md:w-1/2 flex justify-center md:justify-end mt-10 md:mt-0">
+            <div className="relative">
+              <div className="absolute -z-10 w-64 h-64 bg-gradient-to-r from-ayurveda-terracotta/20 to-ayurveda-sage/20 rounded-full blur-3xl"></div>
+              <AyuAvatar 
+                size="lg" 
+                className="float-animation" 
+                isAnimating={isAyuAnimating}
+                showGreeting={showGreeting}
+              />
             </div>
           </div>
         </div>

@@ -30,6 +30,11 @@ const healthFallbackResponses = {
   ],
 };
 
+// Utility to determine if AI is enabled (for demo: checks if API key is present)
+function isAIEnabled() {
+  return !!OPENAI_API_KEY && OPENAI_API_KEY !== "demo";
+}
+
 /**
  * Generate a response from the AI based on user input
  */
@@ -43,6 +48,24 @@ export async function generateAIResponse(
     return {
       text: getEmergencyResponse(language),
       success: true
+    };
+  }
+
+  // Always check for basic symptoms and provide a hardcoded response if matched
+  const hardcoded = getBasicSymptomResponse(userMessage, language);
+  if (hardcoded) {
+    return {
+      text: hardcoded,
+      success: true
+    };
+  }
+
+  // If AI is not enabled, return a generic hardcoded response
+  if (!isAIEnabled()) {
+    return {
+      text: getHardcodedAIChatResponse(userMessage, language),
+      success: false,
+      error: "AI is disabled. Showing hardcoded response."
     };
   }
   
@@ -142,6 +165,38 @@ export async function generateAIResponse(
   }
 }
 
+// Hardcoded fallback for when AI is not enabled
+function getHardcodedAIChatResponse(userMessage: string, language: string): string {
+  // Simple rule-based hardcoded responses
+  const messageLower = userMessage.toLowerCase();
+  if (checkMedicalUrgency(userMessage)) {
+    return getEmergencyResponse(language);
+  }
+  if (messageLower.includes("fever") || messageLower.includes("cold") || messageLower.includes("cough")) {
+    if (language === "te") {
+      return "మీరు జ్వరం లేదా దగ్గు అనుభవిస్తుంటే, దయచేసి విశ్రాంతి తీసుకోండి, తగినంత నీరు త్రాగండి, అవసరమైతే పారాసెటమాల్ తీసుకోండి. లక్షణాలు కొనసాగితే డాక్టర్‌ను సంప్రదించండి.";
+    } else if (language === "kn") {
+      return "ನೀವು ಜ್ವರ ಅಥವಾ ಕೆಮ್ಮು ಅನುಭವಿಸುತ್ತಿದ್ದರೆ, ದಯವಿಟ್ಟು ವಿಶ್ರಾಂತಿ ಮಾಡಿ, ಸಾಕಷ್ಟು ನೀರು ಕುಡಿಯಿರಿ ಮತ್ತು ಅಗತ್ಯವಿದ್ದರೆ ಪ್ಯಾರಾಸಿಟಮಾಲ್ ತೆಗೆದುಕೊಳ್ಳಿ. ಲಕ್ಷಣಗಳು ಮುಂದುವರಿದರೆ ವೈದ್ಯರನ್ನು ಸಂಪರ್ಕಿಸಿ.";
+    }
+    return "If you are experiencing fever or cough, please rest, drink plenty of fluids, and take paracetamol if needed. If symptoms persist, consult a doctor.";
+  }
+  if (messageLower.includes("headache")) {
+    if (language === "te") {
+      return "తల నొప్పి కోసం, విశ్రాంతి తీసుకోండి మరియు తగినంత నీరు త్రాగండి. తీవ్రమైన లేదా కొనసాగుతున్న తల నొప్పికి డాక్టర్‌ను సంప్రదించండి.";
+    } else if (language === "kn") {
+      return "ತಲೆನೋವಿಗೆ, ವಿಶ್ರಾಂತಿ ಮಾಡಿ ಮತ್ತು ಸಾಕಷ್ಟು ನೀರು ಕುಡಿಯಿರಿ. ತೀವ್ರವಾದ ಅಥವಾ ಮುಂದುವರಿದ ತಲೆನೋವಿಗೆ ವೈದ್ಯರನ್ನು ಸಂಪರ್ಕಿಸಿ.";
+    }
+    return "For headaches, rest and hydrate well. If the headache is severe or persistent, consult a doctor.";
+  }
+  // Default
+  if (language === "te") {
+    return "నేను ఆరోగ్య సంబంధిత ప్రశ్నలకు సహాయం చేయడానికి ఇక్కడ ఉన్నాను. మీ ఆందోళన గురించి మరిన్ని వివరాలు చెప్పగలరా?";
+  } else if (language === "kn") {
+    return "ನಾನು ಸಾಮಾನ್ಯ ಆರೋಗ್ಯ ಪ್ರಶ್ನೆಗಳಿಗೆ ಸಹಾಯ ಮಾಡಲು ಇಲ್ಲಿದ್ದೇನೆ. ನಿಮ್ಮ ಕಾಳಜಿಯ ಬಗ್ಗೆ ಹೆಚ್ಚಿನ ವಿವರಗಳನ್ನು ನೀಡಬಹುದೇ?";
+  }
+  return "I'm Ayu, your health companion. I can help with basic health questions. Could you provide more details about your concern?";
+}
+
 /**
  * Provide a fallback response when the API is unavailable
  */
@@ -178,7 +233,7 @@ function provideFallbackResponse(userMessage: string, language: string): AIServi
     if (category === "general") {
       translatedResponse = "ನಾನು ಸಾಮಾನ್ಯ ಆರೋಗ್ಯ ಪ್ರಶ್ನೆಗಳಿಗೆ ಸಹಾಯ ಮಾಡಲು ಇಲ್ಲಿದ್ದೇನೆ. ನಿಮ್ಮ ಕಾಳಜಿಯ ಬಗ್ಗೆ ಹೆಚ್ಚಿನ ವಿವರಗಳನ್ನು ನೀಡಬಹುದೇ?";
     } else if (category === "symptoms") {
-      translatedResponse = "ಹಲವಾರು ಸಾಮಾನ್ಯ ರೋಗಲಕ್ಷಣಗಳಿಗೆ, ವಿಶ್ರಾಂತಿ, ಹೈಡ್ರೇಶನ್ ಮತ್ತು ಕೌಂಟರ್ ಔಷಧಿಗಳು ಸಹಾಯ ಮಾಡಬಹುದು. ನಿಮ್ಮ ರೋಗಲಕ್ಷಣಗಳನ್ನು ಹೆಚ್ಚು ವಿವರವಾಗಿ ವಿವರಿಸಬಹುದೇ?";
+      translatedResponse = "ಹಲವಾರು ಸಾಮಾನ್ಯ ರೋಗಲಕ್ಷಣಗಳಿಗೆ, ವಿಶ್ರಾಂತಿ, ಹೈಡ್ರೇಷನ್ ಮತ್ತು ಕೌಂಟರ್ ಔಷಧಿಗಳು ಸಹಾಯ ಮಾಡಬಹುದು. ನಿಮ್ಮ ರೋಗಲಕ್ಷಣಗಳನ್ನು ಹೆಚ್ಚು ವಿವರವಾಗಿ ವಿವರಿಸಬಹುದೇ?";
     }
   }
   
@@ -187,6 +242,76 @@ function provideFallbackResponse(userMessage: string, language: string): AIServi
     success: false,
     error: "API connection failed"
   };
+}
+
+// Returns a hardcoded message for basic symptoms, or null if no match
+function getBasicSymptomResponse(userMessage: string, language: string): string | null {
+  const messageLower = userMessage.toLowerCase();
+  if (messageLower.includes("fever") || messageLower.includes("temperature")) {
+    if (language === "te") {
+      return "మీరు జ్వరం అనుభవిస్తుంటే, విశ్రాంతి తీసుకోండి, తగినంత నీరు త్రాగండి, మరియు అవసరమైతే పారాసెటమాల్ తీసుకోండి. లక్షణాలు కొనసాగితే డాక్టర్‌ను సంప్రదించండి.";
+    } else if (language === "kn") {
+      return "ನೀವು ಜ್ವರ ಅನುಭವಿಸುತ್ತಿದ್ದರೆ, ವಿಶ್ರಾಂತಿ ಮಾಡಿ, ಸಾಕಷ್ಟು ನೀರು ಕುಡಿಯಿರಿ ಮತ್ತು ಅಗತ್ಯವಿದ್ದರೆ ಪ್ಯಾರಾಸಿಟಮಾಲ್ ತೆಗೆದುಕೊಳ್ಳಿ. ಲಕ್ಷಣಗಳು ಮುಂದುವರಿದರೆ ವೈದ್ಯರನ್ನು ಸಂಪರ್ಕಿಸಿ.";
+    }
+    return "If you have a fever, please rest, drink plenty of fluids, and take paracetamol if needed. If symptoms persist, consult a doctor.";
+  }
+  if (messageLower.includes("cold") || messageLower.includes("runny nose") || messageLower.includes("sneezing")) {
+    if (language === "te") {
+      return "మీరు జలుబు అనుభవిస్తుంటే, తగినంత విశ్రాంతి తీసుకోండి మరియు నీరు త్రాగండి. లక్షణాలు కొనసాగితే డాక్టర్‌ను సంప్రదించండి.";
+    } else if (language === "kn") {
+      return "ನೀವು ಜಲದೋಷ ಅನುಭವಿಸುತ್ತಿದ್ದರೆ, ವಿಶ್ರಾಂತಿ ಮಾಡಿ ಮತ್ತು ಸಾಕಷ್ಟು ನೀರು ಕುಡಿಯಿರಿ. ಲಕ್ಷಣಗಳು ಮುಂದುವರಿದರೆ ವೈದ್ಯರನ್ನು ಸಂಪರ್ಕಿಸಿ.";
+    }
+    return "If you have a cold, rest and drink water. If symptoms persist, consult a doctor.";
+  }
+  if (messageLower.includes("cough")) {
+    if (language === "te") {
+      return "మీరు దగ్గు అనుభవిస్తుంటే, తగినంత నీరు త్రాగండి మరియు అవసరమైతే తేలికపాటి దగ్గు మందులు వాడండి. తీవ్రమైన దగ్గు ఉంటే డాక్టర్‌ను సంప్రదించండి.";
+    } else if (language === "kn") {
+      return "ನೀವು ಕೆಮ್ಮು ಅನುಭವಿಸುತ್ತಿದ್ದರೆ, ಸಾಕಷ್ಟು ನೀರು ಕುಡಿಯಿರಿ ಮತ್ತು ಅಗತ್ಯವಿದ್ದರೆ ಸೌಮ್ಯ ಕೆಮ್ಮು ಔಷಧಿ ಬಳಸಿ. ತೀವ್ರವಾದ ಕೆಮ್ಮಿಗೆ ವೈದ್ಯರನ್ನು ಸಂಪರ್ಕಿಸಿ.";
+    }
+    return "If you have a cough, drink plenty of water and use mild cough syrup if needed. For severe cough, consult a doctor.";
+  }
+  if (messageLower.includes("headache")) {
+    if (language === "te") {
+      return "తల నొప్పి కోసం, విశ్రాంతి తీసుకోండి మరియు తగినంత నీరు త్రాగండి. తీవ్రమైన లేదా కొనసాగుతున్న తల నొప్పికి డాక్టర్‌ను సంప్రదించండి.";
+    } else if (language === "kn") {
+      return "ತಲೆನೋವಿಗೆ, ವಿಶ್ರಾಂತಿ ಮಾಡಿ ಮತ್ತು ಸಾಕಷ್ಟು ನೀರು ಕುಡಿಯಿರಿ. ತೀವ್ರವಾದ ಅಥವಾ ಮುಂದುವರಿದ ತಲೆನೋವಿಗೆ ವೈದ್ಯರನ್ನು ಸಂಪರ್ಕಿಸಿ.";
+    }
+    return "For headaches, rest and hydrate well. If the headache is severe or persistent, consult a doctor.";
+  }
+  if (messageLower.includes("stomach") && messageLower.includes("pain")) {
+    if (language === "te") {
+      return "పేగు నొప్పికి తేలికపాటి ఆహారం తీసుకోండి మరియు తగినంత నీరు త్రాగండి. తీవ్రమైన నొప్పి ఉంటే డాక్టర్‌ను సంప్రదించండి.";
+    } else if (language === "kn") {
+      return "ಹುಜುಕಿನಲ್ಲಿ ನೋವು ಇದ್ದರೆ, ಲಘು ಆಹಾರ ಸೇವಿಸಿ ಮತ್ತು ಸಾಕಷ್ಟು ನೀರು ಕುಡಿಯಿರಿ. ತೀವ್ರವಾದ ನೋವಿಗೆ ವೈದ್ಯರನ್ನು ಸಂಪರ್ಕಿಸಿ.";
+    }
+    return "For stomach pain, eat light food and drink water. For severe pain, consult a doctor.";
+  }
+  if (messageLower.includes("vomit") || messageLower.includes("vomiting")) {
+    if (language === "te") {
+      return "వాంతులు ఉంటే, తగినంత నీరు త్రాగండి మరియు తేలికపాటి ఆహారం తీసుకోండి. తీవ్రమైన వాంతులు ఉంటే డాక్టర్‌ను సంప్రదించండి.";
+    } else if (language === "kn") {
+      return "ಬೇಗನೆ ವಾಂತಿ ಆಗುತ್ತಿದ್ದರೆ, ಸಾಕಷ್ಟು ನೀರು ಕುಡಿಯಿರಿ ಮತ್ತು ಲಘು ಆಹಾರ ಸೇವಿಸಿ. ತೀವ್ರವಾದ ವಾಂತಿಗೆ ವೈದ್ಯರನ್ನು ಸಂಪರ್ಕಿಸಿ.";
+    }
+    return "If vomiting, drink water and eat light food. For severe vomiting, consult a doctor.";
+  }
+  if (messageLower.includes("diarrhea") || messageLower.includes("loose motion")) {
+    if (language === "te") {
+      return "డయేరియా ఉంటే, తగినంత నీరు త్రాగండి మరియు ఒఆర్‌ఎస్ వాడండి. తీవ్రమైన డయేరియా ఉంటే డాక్టర్‌ను సంప్రదించండి.";
+    } else if (language === "kn") {
+      return "ನೀವು ಡೈರಿಯಾ ಅನುಭವಿಸುತ್ತಿದ್ದರೆ, ಸಾಕಷ್ಟು ನೀರು ಕುಡಿಯಿರಿ ಮತ್ತು ಓಆರ್‌ಎಸ್ ಬಳಸಿ. ತೀವ್ರವಾದ ಡೈರಿಯಾಗೆ ವೈದ್ಯರನ್ನು ಸಂಪರ್ಕಿಸಿ.";
+    }
+    return "If you have diarrhea, drink water and use ORS. For severe diarrhea, consult a doctor.";
+  }
+  if (messageLower.includes("rash") || messageLower.includes("skin")) {
+    if (language === "te") {
+      return "చర్మంపై ర్యాష్ ఉంటే, శుభ్రంగా ఉంచండి మరియు అవసరమైతే తేలికపాటి క్రీమ్ వాడండి. తీవ్రమైన ర్యాష్‌కు డాక్టర్‌ను సంప్రదించండి.";
+    } else if (language === "kn") {
+      return "ಚರ್ಮದ ಮೇಲೆ ರ್ಯಾಶ್ ಇದ್ದರೆ, ಸ್ವಚ್ಛವಾಗಿರಿಸಿ ಮತ್ತು ಅಗತ್ಯವಿದ್ದರೆ ಸೌಮ್ಯ ಕ್ರಿಮ್ ಬಳಸಿ. ತೀವ್ರವಾದ ರ್ಯಾಶ್ಗೆ ವೈದ್ಯರನ್ನು ಸಂಪರ್ಕಿಸಿ.";
+    }
+    return "For skin rashes, keep the area clean and use mild cream if needed. For severe rashes, consult a doctor.";
+  }
+  return null;
 }
 
 // Function to determine if user's message potentially needs medical attention

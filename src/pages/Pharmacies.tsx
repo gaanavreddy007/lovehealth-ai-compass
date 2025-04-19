@@ -157,7 +157,7 @@ const Pharmacies = () => {
 
   return (
     <AppLayout>
-      <div className="ayu-container py-12">
+      <div className="ayu-container max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-12">
         <h1 className="text-3xl font-bold mb-2 text-ayurveda-deepblue">
           Nearby Pharmacies
         </h1>
@@ -310,19 +310,21 @@ const Pharmacies = () => {
       {/* Modals */}
       {selectedPharmacy && (
         <>
-          <DeliveryEstimator
-            isOpen={showDeliveryModal}
-            onClose={() => setShowDeliveryModal(false)}
-            pharmacyName={selectedPharmacy.name}
-            estimatedTime={selectedPharmacy.deliveryTime}
-            deliveryFee={selectedPharmacy.deliveryFee}
-          />
-          
-          <PharmacyContact
-            isOpen={showContactModal}
-            onClose={() => setShowContactModal(false)}
-            pharmacy={selectedPharmacy}
-          />
+          {showDeliveryModal && (
+            <DeliveryEstimator
+              onCalculate={() => {}}
+            />
+          )}
+          {showContactModal && (
+            <PharmacyContact
+              name={selectedPharmacy.name}
+              address={selectedPharmacy.address}
+              phone={selectedPharmacy.phone}
+              hours={selectedPharmacy.hours}
+              rating={4.5}
+              isOpen={selectedPharmacy.isOpenNow}
+            />
+          )}
         </>
       )}
     </AppLayout>

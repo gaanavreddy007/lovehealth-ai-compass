@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
+import { scrollToTopSmooth } from "@/lib/scrollToTop";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -35,11 +36,22 @@ const Navbar = () => {
       .toUpperCase();
   };
 
+  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+    // Only scroll for left-clicks, no modifier keys
+    if (
+      !e.defaultPrevented &&
+      e.button === 0 &&
+      !(e.metaKey || e.altKey || e.ctrlKey || e.shiftKey)
+    ) {
+      scrollToTopSmooth();
+    }
+  };
+
   return (
     <nav className="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
       <div className="ayu-container py-4">
         <div className="flex items-center justify-between">
-          <Link to="/" className="flex items-center space-x-2">
+          <Link to="/" className="flex items-center space-x-2" onClick={handleLinkClick}>
             <div className="relative w-10 h-10 bg-gradient-to-br from-ayurveda-terracotta to-ayurveda-sage rounded-full flex items-center justify-center">
               <Heart className="text-white h-5 w-5 animate-pulse-glow" />
             </div>
@@ -47,27 +59,30 @@ const Navbar = () => {
           </Link>
 
           <div className="hidden md:flex items-center space-x-6">
-            <Link to="/symptoms" className="flex items-center space-x-2 text-foreground/80 hover:text-ayurveda-deepblue transition-colors">
+            <Link to="/symptoms" className="flex items-center space-x-2 text-foreground/80 hover:text-ayurveda-deepblue transition-colors" onClick={handleLinkClick}>
               <Heart size={18} />
               <span>Symptom Guide</span>
             </Link>
-            <Link to="/providers" className="flex items-center space-x-2 text-foreground/80 hover:text-ayurveda-deepblue transition-colors">
+            <Link to="/providers" className="flex items-center space-x-2 text-foreground/80 hover:text-ayurveda-deepblue transition-colors" onClick={handleLinkClick}>
               <MapPin size={18} />
               <span>Healthcare Providers</span>
             </Link>
-            <Link to="/pharmacies" className="flex items-center space-x-2 text-foreground/80 hover:text-ayurveda-deepblue transition-colors">
+            <Link to="/pharmacies" className="flex items-center space-x-2 text-foreground/80 hover:text-ayurveda-deepblue transition-colors" onClick={handleLinkClick}>
               <Pill size={18} />
               <span>Pharmacies</span>
+            </Link>
+            <Link to="/health-tracker" className="flex items-center space-x-2 text-foreground/80 hover:text-ayurveda-deepblue transition-colors" onClick={handleLinkClick}>
+              <span>Health Tracker</span>
             </Link>
             
             {!isLoggedIn ? (
               <div className="flex items-center gap-2">
-                <Link to="/signup">
+                <Link to="/signup" onClick={handleLinkClick}>
                   <Button variant="outline" size="sm" className="hidden md:flex">
                     Sign Up
                   </Button>
                 </Link>
-                <Link to="/login">
+                <Link to="/login" onClick={handleLinkClick}>
                   <Button size="sm" className="bg-ayurveda-deepblue hover:bg-ayurveda-deepblue/90">
                     Sign In
                   </Button>
@@ -91,7 +106,7 @@ const Navbar = () => {
                   </div>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link to="/profile" className="cursor-pointer">
+                    <Link to="/profile" className="cursor-pointer" onClick={handleLinkClick}>
                       <User className="mr-2 h-4 w-4" />
                       <span>Profile</span>
                     </Link>
@@ -114,33 +129,36 @@ const Navbar = () => {
 
         {isMenuOpen && (
           <div className="md:hidden mt-4 pb-4 space-y-4 animate-fade-in">
-            <Link to="/symptoms" className="block py-2 px-4 rounded-md hover:bg-muted">
+            <Link to="/symptoms" className="block py-2 px-4 rounded-md hover:bg-muted" onClick={handleLinkClick}>
               <div className="flex items-center space-x-2">
                 <Heart size={18} />
                 <span>Symptom Guide</span>
               </div>
             </Link>
-            <Link to="/providers" className="block py-2 px-4 rounded-md hover:bg-muted">
+            <Link to="/providers" className="block py-2 px-4 rounded-md hover:bg-muted" onClick={handleLinkClick}>
               <div className="flex items-center space-x-2">
                 <MapPin size={18} />
                 <span>Healthcare Providers</span>
               </div>
             </Link>
-            <Link to="/pharmacies" className="block py-2 px-4 rounded-md hover:bg-muted">
+            <Link to="/pharmacies" className="block py-2 px-4 rounded-md hover:bg-muted" onClick={handleLinkClick}>
               <div className="flex items-center space-x-2">
                 <Pill size={18} />
                 <span>Pharmacies</span>
               </div>
             </Link>
+            <Link to="/health-tracker" className="block py-2 px-4 rounded-md hover:bg-muted" onClick={handleLinkClick}>
+              <span>Health Tracker</span>
+            </Link>
             
             {!isLoggedIn ? (
               <div className="block py-2 px-4">
-                <Link to="/signup">
+                <Link to="/signup" onClick={handleLinkClick}>
                   <Button variant="outline" size="sm" className="w-full">
                     Sign Up
                   </Button>
                 </Link>
-                <Link to="/login" className="mt-2">
+                <Link to="/login" className="mt-2" onClick={handleLinkClick}>
                   <Button size="sm" className="w-full bg-ayurveda-deepblue hover:bg-ayurveda-deepblue/90">
                     Sign In
                   </Button>

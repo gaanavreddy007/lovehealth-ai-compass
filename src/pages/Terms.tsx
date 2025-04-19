@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 const Terms = () => {
   return (
     <AppLayout>
-      <div className="ayu-container py-12">
+      <div className="ayu-container max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-12">
         <h1 className="text-3xl font-bold mb-2 text-ayurveda-deepblue">Terms of Use</h1>
         <p className="text-muted-foreground mb-8">
           Last updated: April 18, 2025

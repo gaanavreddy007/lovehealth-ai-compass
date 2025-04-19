@@ -93,64 +93,70 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-ayurveda-sage/20 to-ayurveda-terracotta/20">
-      <Card className="w-full max-w-md mx-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-ayurveda-sage/20 to-ayurveda-terracotta/20 ayu-container max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+      <Card className="w-full max-w-md mx-4" role="main" aria-label="Login form">
         <CardHeader className="space-y-2">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <div className="relative w-8 h-8 bg-gradient-to-br from-ayurveda-terracotta to-ayurveda-sage rounded-full flex items-center justify-center">
-                <Heart className="text-white h-4 w-4" />
-              </div>
-              <CardTitle className="text-2xl font-bold text-ayurveda-deepblue">
-                {t.loginTitle}
-              </CardTitle>
+          <div className="flex items-center gap-2">
+            <div className="relative w-8 h-8 bg-gradient-to-br from-ayurveda-terracotta to-ayurveda-sage rounded-full flex items-center justify-center">
+              <Heart className="text-white h-4 w-4" />
             </div>
-            <LanguageSelector
-              currentLanguage={language}
-              onLanguageChange={setLanguage}
-            />
+            <CardTitle className="text-2xl font-bold text-ayurveda-deepblue" id="login-title">
+              {t.loginTitle}
+            </CardTitle>
           </div>
+          <LanguageSelector
+            currentLanguage={language}
+            onLanguageChange={setLanguage}
+          />
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-4" aria-labelledby="login-title" aria-describedby="login-error" role="form">
             <div className="space-y-2">
-              <label className="text-sm font-medium">{t.emailLabel}</label>
+              <label htmlFor="login-email" className="text-sm font-medium">{t.emailLabel}</label>
               <Input
+                id="login-email"
                 type="email"
                 placeholder={t.emailPlaceholder}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
-                className={errors.email ? "border-red-500" : ""}
+                className={`focus-visible:outline focus-visible:outline-2 focus-visible:outline-ayurveda-terracotta transition-all ${errors.email ? "border-red-500" : ""}`}
+                aria-invalid={!!errors.email}
+                aria-describedby={errors.email ? "login-email-error" : undefined}
               />
               {errors.email && (
-                <p className="text-xs text-red-500 mt-1">{errors.email}</p>
+                <p id="login-email-error" className="text-xs text-red-500 mt-1" role="alert">{errors.email}</p>
               )}
             </div>
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <label className="text-sm font-medium">{t.passwordLabel}</label>
+                <label htmlFor="login-password" className="text-sm font-medium">{t.passwordLabel}</label>
                 <Link to="/forgot-password" className="text-xs text-ayurveda-deepblue hover:underline">
                   {t.forgotPassword}
                 </Link>
               </div>
               <Input
+                id="login-password"
                 type="password"
                 placeholder={t.passwordPlaceholder}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
-                className={errors.password ? "border-red-500" : ""}
+                className={`focus-visible:outline focus-visible:outline-2 focus-visible:outline-ayurveda-terracotta transition-all ${errors.password ? "border-red-500" : ""}`}
+                aria-invalid={!!errors.password}
+                aria-describedby={errors.password ? "login-password-error" : undefined}
               />
               {errors.password && (
-                <p className="text-xs text-red-500 mt-1">{errors.password}</p>
+                <p id="login-password-error" className="text-xs text-red-500 mt-1" role="alert">{errors.password}</p>
               )}
             </div>
             <Button 
               type="submit" 
-              className="w-full bg-ayurveda-deepblue hover:bg-ayurveda-deepblue/90"
+              className="w-full bg-ayurveda-deepblue hover:bg-ayurveda-deepblue/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ayurveda-terracotta transition-all flex items-center justify-center gap-2"
+              aria-label={t.loginButton}
               disabled={isLoading}
             >
+              {isLoading && <span className="loader h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" aria-hidden="true"></span>}
               {isLoading ? "Signing in..." : t.loginButton}
             </Button>
           </form>
@@ -162,7 +168,7 @@ export default function Login() {
                 variant="outline" 
                 size="sm" 
                 onClick={() => handleDemoLogin("user@example.com")}
-                className="text-xs"
+                className="text-xs focus-visible:outline focus-visible:outline-2 focus-visible:outline-ayurveda-terracotta transition-all"
               >
                 English
               </Button>
@@ -170,7 +176,7 @@ export default function Login() {
                 variant="outline" 
                 size="sm" 
                 onClick={() => handleDemoLogin("telugu@example.com")}
-                className="text-xs"
+                className="text-xs focus-visible:outline focus-visible:outline-2 focus-visible:outline-ayurveda-terracotta transition-all"
               >
                 Telugu
               </Button>
@@ -178,7 +184,7 @@ export default function Login() {
                 variant="outline" 
                 size="sm" 
                 onClick={() => handleDemoLogin("kannada@example.com")}
-                className="text-xs"
+                className="text-xs focus-visible:outline focus-visible:outline-2 focus-visible:outline-ayurveda-terracotta transition-all"
               >
                 Kannada
               </Button>

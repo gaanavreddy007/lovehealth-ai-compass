@@ -5,7 +5,7 @@ import AyuAvatar from "@/components/ayu/AyuAvatar";
 
 const NotFound = () => {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-ayurveda-cream/20 to-background p-4">
+    <div className="ayu-container max-w-7xl mx-auto px-4 sm:px-6 md:px-8 flex flex-col items-center justify-center min-h-[60vh] bg-gradient-to-b from-ayurveda-cream/20 to-background p-4">
       <div className="max-w-md w-full text-center space-y-6">
         <AyuAvatar size="lg" isAnimating={true} />
         

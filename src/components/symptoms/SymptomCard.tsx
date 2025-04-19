@@ -25,12 +25,17 @@ const SymptomCard = ({
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <Card className={cn("overflow-hidden", className)}>
+    <div
+      className="bg-white rounded-xl shadow-md p-5 flex flex-col gap-3 hover:shadow-lg focus-within:shadow-lg transition-shadow border border-ayurveda-sage/30 min-h-[180px] cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-ayurveda-terracotta"
+      tabIndex={0}
+      role="button"
+      aria-label={`Symptom: ${title}`}
+    >
       <CardHeader className="bg-gradient-to-r from-ayurveda-sage/10 to-transparent">
         <div className="flex justify-between items-center">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 mb-2">
             {icon && <div className="text-ayurveda-deepblue">{icon}</div>}
-            <CardTitle className="text-xl text-ayurveda-deepblue">{title}</CardTitle>
+            <CardTitle className="text-lg font-semibold text-ayurveda-deepblue">{title}</CardTitle>
           </div>
           <Button
             variant="ghost"
@@ -47,7 +52,7 @@ const SymptomCard = ({
         </div>
       </CardHeader>
       <CardContent className="pb-6 pt-4">
-        <p className="text-muted-foreground mb-4">{description}</p>
+        <p className="text-sm text-ayurveda-deepblue/90 mb-1">{description}</p>
 
         {expanded && (
           <>
@@ -98,7 +103,7 @@ const SymptomCard = ({
           </Button>
         )}
       </CardContent>
-    </Card>
+    </div>
   );
 };
 

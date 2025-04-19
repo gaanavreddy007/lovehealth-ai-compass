@@ -18,6 +18,7 @@ import Privacy from "@/pages/Privacy";
 import Terms from "@/pages/Terms";
 import Disclaimer from "@/pages/Disclaimer";
 import Contact from "@/pages/Contact";
+import HealthTracker from "@/pages/HealthTracker";
 
 const App = () => {
   const queryClient = new QueryClient();
@@ -42,6 +43,7 @@ const App = () => {
               <Route path="/terms" element={<Terms />} />
               <Route path="/disclaimer" element={<Disclaimer />} />
               <Route path="/contact" element={<Contact />} />
+              <Route path="/health-tracker" element={<HealthTracker />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

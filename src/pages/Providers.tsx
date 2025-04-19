@@ -201,7 +201,7 @@ const Providers = () => {
 
   return (
     <AppLayout>
-      <div className="ayu-container py-12">
+      <div className="ayu-container max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-12">
         <h1 className="text-3xl font-bold mb-2 text-ayurveda-deepblue">Healthcare Providers</h1>
         <p className="text-muted-foreground mb-8">
           Find qualified healthcare providers and specialists in Bengaluru.
@@ -382,18 +382,31 @@ const Providers = () => {
       {/* Modals */}
       {selectedProvider && (
         <>
-          <BookAppointmentModal
-            isOpen={showAppointmentModal}
-            onClose={() => setShowAppointmentModal(false)}
-            providerName={selectedProvider.name}
-          />
-          
-          <ProviderMap
-            isOpen={showMapModal}
-            onClose={() => setShowMapModal(false)}
-            providerName={selectedProvider.name}
-            address={`${selectedProvider.address}, ${selectedProvider.area}, Bengaluru`}
-          />
+          {showAppointmentModal && (
+            <BookAppointmentModal
+              isOpen={showAppointmentModal}
+              onClose={() => setShowAppointmentModal(false)}
+              providerName={selectedProvider.name}
+            />
+          )}
+          {showMapModal && (
+            <ProviderMap
+              providers={[
+                {
+                  id: selectedProvider.id,
+                  name: selectedProvider.name,
+                  speciality: selectedProvider.specialty,
+                  address: selectedProvider.address,
+                  area: selectedProvider.area,
+                  latitude: 12.9716,
+                  longitude: 77.5946
+                }
+              ]}
+              selectedProviderId={selectedProvider.id}
+              center={{ lat: 12.9716, lng: 77.5946 }}
+              zoom={14}
+            />
+          )}
         </>
       )}
     </AppLayout>

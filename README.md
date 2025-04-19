@@ -1,123 +1,113 @@
 # LoveHealth AI Compass
 
-LoveHealth AI Compass is a health assistant platform featuring Ayu, an AI health companion designed for Bengaluru residents. The application blends modern healthcare with traditional wisdom to provide personalized health guidance.
+A comprehensive, multilingual AI-powered health assistant for Bengaluru residents and beyond. LoveHealth AI Compass offers personalized health guidance, symptom tracking, provider and pharmacy locators, robust authentication, and a modern, accessible user experience.
 
-## Features
+---
 
-- **Symptom Guide**: Get personalized health guidance with traditional and modern remedies for common ailments
-- **Healthcare Provider Finder**: Find the right hospitals and specialists across Bengaluru neighborhoods
-- **Pharmacy Locator**: Locate nearby pharmacies with operating hours and medication delivery services
-- **Multilingual Support**: Available in English, Telugu, and Kannada
-- **User Authentication**: Personalized experience with user accounts and preferences
+## 🌟 Features
 
-## Technologies Used
+- **AI Health Assistant (Ayu):**
+  - Context-aware, multilingual chat (English, Telugu, Kannada)
+  - Emergency detection and response
+  - Fallbacks for uncertain queries
+- **Authentication & User Management:**
+  - Signup, login, logout, profile management
+  - Language preference per user
+- **Comprehensive Health Resources:**
+  - Symptom Guide
+  - Healthcare Provider Finder
+  - Pharmacy Locator
+  - FAQ, Blog, About, Contact, Privacy, Terms, Disclaimer
+- **Health Tracker:**
+  - Log symptoms, mood, and health events
+  - Dashboard of recent logs (local storage, privacy-first)
+- **Multilingual Support:**
+  - English, Telugu, Kannada (easy to extend)
+- **Modern UI/UX:**
+  - Responsive, accessible (ARIA labels, keyboard navigation)
+  - Consistent design with shadcn/ui and Tailwind CSS
+- **Robust Error Handling:**
+  - Toasts/snackbars for all major actions
+  - Friendly error messages
+- **Security & Privacy:**
+  - Environment variable management for API keys
+  - No persistent storage of sensitive health conversations
+  - Medical disclaimer on all health info
 
-- **Frontend**: React, TypeScript, Vite
-- **UI Components**: shadcn/ui, Tailwind CSS
-- **State Management**: React Context API, React Query
-- **AI Integration**: OpenAI API for health guidance
-- **Authentication**: Local storage-based authentication (demo)
+---
 
-## Getting Started
+## 🚀 Getting Started
 
-### Prerequisites
-
-- Node.js (v16 or higher)
-- npm or yarn package manager
-- OpenAI API key (for AI chat functionality)
-
-### Installation
-
-1. Clone the repository:
+### 1. Clone the Repository
 ```sh
-git clone https://github.com/yourusername/lovehealth-ai-compass.git
+git clone https://github.com/YOUR_GITHUB_USERNAME/lovehealth-ai-compass.git
 cd lovehealth-ai-compass
 ```
 
-2. Install dependencies:
+### 2. Install Dependencies
 ```sh
 npm install
-# or
-yarn install
 ```
 
-3. Create a `.env` file in the root directory with your OpenAI API key:
+### 3. Set Up Environment Variables
+- Copy `.env.example` to `.env` and add your [OpenAI API key](https://platform.openai.com/account/api-keys):
 ```
-VITE_OPENAI_API_KEY=your_openai_api_key_here
+VITE_OPENAI_API_KEY=your-openai-key-here
 ```
 
-4. Start the development server:
+### 4. Run the App Locally
 ```sh
 npm run dev
-# or
-yarn dev
 ```
+Visit [http://localhost:5173](http://localhost:5173) in your browser.
 
-5. Open your browser and navigate to `http://localhost:5173`
-
-## Demo Accounts
-
-For testing purposes, you can use the following demo accounts:
-
-- **English User**: 
-  - Email: user@example.com
-  - Password: password123
-
-- **Telugu User**: 
-  - Email: telugu@example.com
-  - Password: password123
-
-- **Kannada User**: 
-  - Email: kannada@example.com
-  - Password: password123
-
-## Project Structure
-
-```
-lovehealth-ai-compass/
-├── public/               # Static assets
-├── src/
-│   ├── components/       # Reusable UI components
-│   │   ├── ayu/          # Ayu-specific components
-│   │   ├── auth/         # Authentication components
-│   │   ├── layout/       # Layout components
-│   │   ├── symptoms/     # Symptom-related components
-│   │   └── ui/           # shadcn/ui components
-│   ├── hooks/            # Custom React hooks
-│   ├── lib/
-│   │   ├── contexts/     # React contexts
-│   │   └── services/     # API services
-│   ├── pages/            # Application pages
-│   ├── App.tsx           # Main application component
-│   └── main.tsx          # Application entry point
-├── .env                  # Environment variables (local)
-├── .env.example          # Example environment variables
-└── package.json          # Project dependencies
-```
-
-## Deployment
-
-To deploy this application:
-
-1. Build the production version:
+### 5. Build for Production
 ```sh
 npm run build
-# or
-yarn build
 ```
 
-2. The build output will be in the `dist` directory, which can be deployed to any static hosting service like Netlify, Vercel, or GitHub Pages.
+---
 
-## Contributing
+## 🌐 Deployment
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+- **Vercel** and **Netlify** are recommended for seamless deployment.
+- Connect your GitHub repo, set environment variables in the dashboard, and deploy.
+- For GitHub Pages, use a static build and publish the `dist` folder.
 
-## License
+---
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+## 🛡️ Accessibility & Best Practices
+- All forms, navigation, and chat are ARIA-labeled and keyboard accessible.
+- High color contrast and visible focus states for all interactive elements.
+- Responsive layouts for desktop and mobile.
 
-## Acknowledgments
+---
 
-- This project was built with [Lovable](https://lovable.dev/projects/d0ccc255-0f0a-4d23-bf55-2ee2475a986c)
-- UI components from [shadcn/ui](https://ui.shadcn.com/)
-- Icons from [Lucide React](https://lucide.dev/)
+## 🧑‍💻 Tech Stack
+- **Frontend:** React, TypeScript, Vite
+- **UI:** shadcn/ui, Tailwind CSS
+- **State:** React Context API
+- **AI:** OpenAI API
+- **Icons:** Lucide
+
+---
+
+## 👩‍⚕️ Demo Users
+- English: `user@example.com` / `password123`
+- Telugu: `telugu@example.com` / `password123`
+- Kannada: `kannada@example.com` / `password123`
+
+---
+
+## 📄 License
+MIT
+
+---
+
+## 🙏 Disclaimer
+LoveHealth AI Compass is for educational purposes only and does not provide professional medical advice. Always consult a qualified healthcare provider for medical concerns.
+
+---
+
+## 💬 Feedback & Contributions
+Issues and PRs welcome! Help us make health guidance accessible for all.

@@ -78,7 +78,7 @@ const Profile = () => {
 
   return (
     <AppLayout>
-      <div className="ayu-container py-12">
+      <div className="ayu-container max-w-4xl mx-auto px-4 sm:px-6 md:px-8 py-10">
         <h1 className="text-3xl font-bold mb-2 text-ayurveda-deepblue">Your Profile</h1>
         <p className="text-muted-foreground mb-8">
           Manage your account settings and preferences

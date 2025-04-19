@@ -94,105 +94,115 @@ export default function Signup() {
   const t = translations[language];
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-ayurveda-sage/20 to-ayurveda-terracotta/20">
-      <Card className="w-full max-w-md mx-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-ayurveda-sage/20 to-ayurveda-terracotta/20 ayu-container max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+      <Card className="w-full max-w-md mx-4" role="main" aria-label="Signup form">
         <CardHeader className="space-y-2">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
               <div className="relative w-8 h-8 bg-gradient-to-br from-ayurveda-terracotta to-ayurveda-sage rounded-full flex items-center justify-center">
                 <Heart className="text-white h-4 w-4" />
               </div>
-              <CardTitle className="text-2xl font-bold text-ayurveda-deepblue">
+              <CardTitle className="text-2xl font-bold text-ayurveda-deepblue" id="signup-title">
                 Create Account
               </CardTitle>
             </div>
             <LanguageSelector
               currentLanguage={language}
               onLanguageChange={setLanguage}
+              aria-label="Select language"
             />
           </div>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSignup} className="space-y-4">
+          <form onSubmit={handleSignup} className="space-y-4" aria-labelledby="signup-title" aria-describedby="signup-error" role="form">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Full Name</label>
+              <label htmlFor="signup-name" className="text-sm font-medium">Full Name</label>
               <Input
+                id="signup-name"
                 type="text"
                 placeholder="Enter your full name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 disabled={isLoading}
                 className={errors.name ? "border-red-500" : ""}
+                aria-invalid={!!errors.name}
+                aria-describedby={errors.name ? "signup-name-error" : undefined}
               />
               {errors.name && (
-                <p className="text-xs text-red-500 mt-1">{errors.name}</p>
+                <p id="signup-name-error" className="text-xs text-red-500 mt-1" role="alert">{errors.name}</p>
               )}
             </div>
-            
             <div className="space-y-2">
-              <label className="text-sm font-medium">Email</label>
+              <label htmlFor="signup-email" className="text-sm font-medium">Email</label>
               <Input
+                id="signup-email"
                 type="email"
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
                 className={errors.email ? "border-red-500" : ""}
+                aria-invalid={!!errors.email}
+                aria-describedby={errors.email ? "signup-email-error" : undefined}
               />
               {errors.email && (
-                <p className="text-xs text-red-500 mt-1">{errors.email}</p>
+                <p id="signup-email-error" className="text-xs text-red-500 mt-1" role="alert">{errors.email}</p>
               )}
             </div>
-            
             <div className="space-y-2">
-              <label className="text-sm font-medium">Password</label>
+              <label htmlFor="signup-password" className="text-sm font-medium">Password</label>
               <Input
+                id="signup-password"
                 type="password"
                 placeholder="Create a password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
                 className={errors.password ? "border-red-500" : ""}
+                aria-invalid={!!errors.password}
+                aria-describedby={errors.password ? "signup-password-error" : undefined}
               />
               {errors.password && (
-                <p className="text-xs text-red-500 mt-1">{errors.password}</p>
+                <p id="signup-password-error" className="text-xs text-red-500 mt-1" role="alert">{errors.password}</p>
               )}
             </div>
-            
             <div className="space-y-2">
-              <label className="text-sm font-medium">Confirm Password</label>
+              <label htmlFor="signup-confirm-password" className="text-sm font-medium">Confirm Password</label>
               <Input
+                id="signup-confirm-password"
                 type="password"
                 placeholder="Confirm your password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 disabled={isLoading}
                 className={errors.confirmPassword ? "border-red-500" : ""}
+                aria-invalid={!!errors.confirmPassword}
+                aria-describedby={errors.confirmPassword ? "signup-confirm-password-error" : undefined}
               />
               {errors.confirmPassword && (
-                <p className="text-xs text-red-500 mt-1">{errors.confirmPassword}</p>
+                <p id="signup-confirm-password-error" className="text-xs text-red-500 mt-1" role="alert">{errors.confirmPassword}</p>
               )}
             </div>
-            
             <div className="space-y-2">
               <label className="text-sm font-medium">Preferred Language</label>
               <div className="mt-1">
                 <LanguageSelector
                   currentLanguage={language}
                   onLanguageChange={setLanguage}
+                  aria-label="Select language"
                 />
               </div>
             </div>
-            
             <Button 
               type="submit" 
-              className="w-full bg-ayurveda-deepblue hover:bg-ayurveda-deepblue/90"
+              className="w-full bg-ayurveda-deepblue hover:bg-ayurveda-deepblue/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ayurveda-terracotta transition-all flex items-center justify-center gap-2"
               disabled={isLoading}
+              aria-label="Create account"
             >
+              {isLoading && <span className="loader h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" aria-hidden="true"></span>}
               {isLoading ? "Creating Account..." : "Create Account"}
             </Button>
           </form>
-          
           <div className="mt-6 pt-4 border-t border-gray-200">
             <p className="text-sm text-center text-muted-foreground">
               By creating an account, you agree to our{" "}
