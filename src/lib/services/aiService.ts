@@ -7,6 +7,10 @@ interface AIServiceResponse {
   error?: string;
 }
 
+// Gemini API configuration
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || ""; // Use environment variable
+const GEMINI_API_URL = "http://localhost:5174/api/gemini"; // Use backend proxy endpoint
+
 // OpenAI API configuration
 const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY || ""; // Use environment variable
 const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
@@ -60,109 +64,45 @@ export async function generateAIResponse(
     };
   }
 
-  // If AI is not enabled, return a generic hardcoded response
-  if (!isAIEnabled()) {
-    return {
-      text: getHardcodedAIChatResponse(userMessage, language),
-      success: false,
-      error: "AI is disabled. Showing hardcoded response."
-    };
-  }
-  
+  // --- Gemini API integration (via backend proxy) ---
   try {
-    // Use a more efficient model with lower token costs
-    const model = "gpt-3.5-turbo";
-    
-    // Try to connect to API with a timeout to avoid long waiting times
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-    
-    // System prompt updated to be a general health assistant
-    const systemMessage = {
-      role: "system", 
-      content: `You are Ayu, a compassionate health assistant providing guidance on basic symptoms for people in Bengaluru, India. 
-      Give evidence-based health information that blends modern medicine with traditional Ayurvedic approaches when appropriate.
-      Always advise users to consult healthcare professionals for proper diagnosis and treatment.
-      Keep responses concise, helpful, and culturally relevant to Indian users.
-      Focus on common health issues, preventive care, and when to seek professional help.`
+    const geminiBody = {
+      contents: [
+        { role: "user", parts: [{ text: userMessage }] },
+        ...conversationContext.map(msg => ({ role: "model", parts: [{ text: msg }] }))
+      ]
     };
-    
-    // Only keep the most recent 4 exchanges to reduce token count
-    let recentContext: {role: string, content: string}[] = [];
-    
-    // Process recent messages to keep context concise
-    if (conversationContext.length > 0) {
-      const maxContextMessages = Math.min(conversationContext.length, 4);
-      for (let i = conversationContext.length - maxContextMessages; i < conversationContext.length; i++) {
-        recentContext.push({
-          role: i % 2 === 0 ? "user" : "assistant",
-          content: conversationContext[i]
-        });
-      }
-    }
-    
-    // Build messages array with system message, recent context, and current message
-    const messages = [
-      systemMessage,
-      ...recentContext,
-      { role: "user", content: userMessage }
-    ];
-    
-    // If language is not English, add translation instruction
-    if (language !== "en") {
-      let languageName = language === "te" ? "Telugu" : "Kannada";
-      messages.push({
-        role: "system",
-        content: `Respond in ${languageName} language. If you include any medical terms that don't have a direct translation, provide the English term in parentheses.`
-      });
-    }
-    
-    // Check if API key is available
-    if (!OPENAI_API_KEY) {
-      console.warn("No OpenAI API key provided. Using fallback responses.");
-      return provideFallbackResponse(userMessage, language);
-    }
-    
-    // Attempt to fetch from OpenAI API
-    const response = await fetch(OPENAI_API_URL, {
+    const response = await fetch(GEMINI_API_URL, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
+        "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        model,
-        messages,
-        temperature: 0.7,
-        max_tokens: 256,
-        top_p: 1,
-        frequency_penalty: 0,
-        presence_penalty: 0
-      }),
-      signal: controller.signal
+      body: JSON.stringify(geminiBody)
     });
-    
-    clearTimeout(timeoutId);
-    
-    // Check if the response was successful
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error("API error:", response.status, errorData);
-      throw new Error(`API error: ${response.status}`);
+      console.error("Gemini API error:", response.status, errorData);
+      throw new Error(`Gemini API error: ${response.status}`);
     }
-    
     const data = await response.json();
-    const aiResponse = data.choices[0].message.content.trim();
-    
-    return {
-      text: aiResponse,
-      success: true
-    };
-    
+    const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+    if (aiResponse) {
+      return {
+        text: aiResponse,
+        success: true
+      };
+    }
   } catch (error) {
-    console.error("AI Service Error:", error);
-    return provideFallbackResponse(userMessage, language);
+    console.error("Gemini AI Service Error:", error);
+    // fallback to hardcoded below
   }
+
+  // If Gemini API fails, fallback to hardcoded
+  return {
+    text: getHardcodedAIChatResponse(userMessage, language),
+    success: false,
+    error: "Gemini API unavailable, using hardcoded fallback."
+  };
 }
 
 // Hardcoded fallback for when AI is not enabled
@@ -247,6 +187,8 @@ function provideFallbackResponse(userMessage: string, language: string): AIServi
 // Returns a hardcoded message for basic symptoms, or null if no match
 function getBasicSymptomResponse(userMessage: string, language: string): string | null {
   const messageLower = userMessage.toLowerCase();
+
+  // Fever
   if (messageLower.includes("fever") || messageLower.includes("temperature")) {
     if (language === "te") {
       return "మీరు జ్వరం అనుభవిస్తుంటే, విశ్రాంతి తీసుకోండి, తగినంత నీరు త్రాగండి, మరియు అవసరమైతే పారాసెటమాల్ తీసుకోండి. లక్షణాలు కొనసాగితే డాక్టర్‌ను సంప్రదించండి.";
@@ -255,6 +197,8 @@ function getBasicSymptomResponse(userMessage: string, language: string): string 
     }
     return "If you have a fever, please rest, drink plenty of fluids, and take paracetamol if needed. If symptoms persist, consult a doctor.";
   }
+
+  // Cold
   if (messageLower.includes("cold") || messageLower.includes("runny nose") || messageLower.includes("sneezing")) {
     if (language === "te") {
       return "మీరు జలుబు అనుభవిస్తుంటే, తగినంత విశ్రాంతి తీసుకోండి మరియు నీరు త్రాగండి. లక్షణాలు కొనసాగితే డాక్టర్‌ను సంప్రదించండి.";
@@ -263,6 +207,8 @@ function getBasicSymptomResponse(userMessage: string, language: string): string 
     }
     return "If you have a cold, rest and drink water. If symptoms persist, consult a doctor.";
   }
+
+  // Cough
   if (messageLower.includes("cough")) {
     if (language === "te") {
       return "మీరు దగ్గు అనుభవిస్తుంటే, తగినంత నీరు త్రాగండి మరియు అవసరమైతే తేలికపాటి దగ్గు మందులు వాడండి. తీవ్రమైన దగ్గు ఉంటే డాక్టర్‌ను సంప్రదించండి.";
@@ -271,6 +217,8 @@ function getBasicSymptomResponse(userMessage: string, language: string): string 
     }
     return "If you have a cough, drink plenty of water and use mild cough syrup if needed. For severe cough, consult a doctor.";
   }
+
+  // Headache
   if (messageLower.includes("headache")) {
     if (language === "te") {
       return "తల నొప్పి కోసం, విశ్రాంతి తీసుకోండి మరియు తగినంత నీరు త్రాగండి. తీవ్రమైన లేదా కొనసాగుతున్న తల నొప్పికి డాక్టర్‌ను సంప్రదించండి.";
@@ -279,7 +227,9 @@ function getBasicSymptomResponse(userMessage: string, language: string): string 
     }
     return "For headaches, rest and hydrate well. If the headache is severe or persistent, consult a doctor.";
   }
-  if (messageLower.includes("stomach") && messageLower.includes("pain")) {
+
+  // Stomach pain
+  if ((messageLower.includes("stomach") && messageLower.includes("pain")) || messageLower.includes("abdominal pain")) {
     if (language === "te") {
       return "పేగు నొప్పికి తేలికపాటి ఆహారం తీసుకోండి మరియు తగినంత నీరు త్రాగండి. తీవ్రమైన నొప్పి ఉంటే డాక్టర్‌ను సంప్రదించండి.";
     } else if (language === "kn") {
@@ -287,30 +237,88 @@ function getBasicSymptomResponse(userMessage: string, language: string): string 
     }
     return "For stomach pain, eat light food and drink water. For severe pain, consult a doctor.";
   }
-  if (messageLower.includes("vomit") || messageLower.includes("vomiting")) {
+
+  // Sore throat
+  if (messageLower.includes("sore throat") || messageLower.includes("throat pain")) {
     if (language === "te") {
-      return "వాంతులు ఉంటే, తగినంత నీరు త్రాగండి మరియు తేలికపాటి ఆహారం తీసుకోండి. తీవ్రమైన వాంతులు ఉంటే డాక్టర్‌ను సంప్రదించండి.";
+      return "గొంతు నొప్పికి గోరువెచ్చని నీరు త్రాగండి మరియు ఉప్పు నీటితో గార్గిల్ చేయండి. తీవ్రమైన నొప్పి ఉంటే డాక్టర్‌ను సంప్రదించండి.";
     } else if (language === "kn") {
-      return "ಬೇಗನೆ ವಾಂತಿ ಆಗುತ್ತಿದ್ದರೆ, ಸಾಕಷ್ಟು ನೀರು ಕುಡಿಯಿರಿ ಮತ್ತು ಲಘು ಆಹಾರ ಸೇವಿಸಿ. ತೀವ್ರವಾದ ವಾಂತಿಗೆ ವೈದ್ಯರನ್ನು ಸಂಪರ್ಕಿಸಿ.";
+      return "ಕಂಠನೋವಿಗೆ ಬಿಸಿ ನೀರು ಕುಡಿಯಿರಿ ಮತ್ತು ಉಪ್ಪು ನೀರಿನಿಂದ ಗಾರ್ಗಲ್ ಮಾಡಿ. ತೀವ್ರವಾದ ನೋವಿಗೆ ವೈದ್ಯರನ್ನು ಸಂಪರ್ಕಿಸಿ.";
     }
-    return "If vomiting, drink water and eat light food. For severe vomiting, consult a doctor.";
+    return "For sore throat, drink warm water and gargle with salt water. For severe pain, consult a doctor.";
   }
+
+  // Diarrhea
   if (messageLower.includes("diarrhea") || messageLower.includes("loose motion")) {
     if (language === "te") {
-      return "డయేరియా ఉంటే, తగినంత నీరు త్రాగండి మరియు ఒఆర్‌ఎస్ వాడండి. తీవ్రమైన డయేరియా ఉంటే డాక్టర్‌ను సంప్రదించండి.";
+      return "డయ్యరీయా ఉన్నప్పుడు, తగినంత నీరు త్రాగండి మరియు తేలికపాటి ఆహారం తీసుకోండి. డీహైడ్రేషన్ ఉంటే డాక్టర్‌ను సంప్రదించండి.";
     } else if (language === "kn") {
-      return "ನೀವು ಡೈರಿಯಾ ಅನುಭವಿಸುತ್ತಿದ್ದರೆ, ಸಾಕಷ್ಟು ನೀರು ಕುಡಿಯಿರಿ ಮತ್ತು ಓಆರ್‌ಎಸ್ ಬಳಸಿ. ತೀವ್ರವಾದ ಡೈರಿಯಾಗೆ ವೈದ್ಯರನ್ನು ಸಂಪರ್ಕಿಸಿ.";
+      return "ಅತಿಸಾರ ಇದ್ದರೆ ಸಾಕಷ್ಟು ನೀರು ಕುಡಿಯಿರಿ ಮತ್ತು ಲಘು ಆಹಾರ ಸೇವಿಸಿ. ಡಿಹೈಡ್ರೇಶನ್ ಇದ್ದರೆ ವೈದ್ಯರನ್నು ಸಂಪರ್ಕಿಸಿ.";
     }
-    return "If you have diarrhea, drink water and use ORS. For severe diarrhea, consult a doctor.";
+    return "For diarrhea, drink plenty of water and eat light food. If you have dehydration, consult a doctor.";
   }
-  if (messageLower.includes("rash") || messageLower.includes("skin")) {
+
+  // Vomiting
+  if (messageLower.includes("vomiting") || messageLower.includes("nausea")) {
     if (language === "te") {
-      return "చర్మంపై ర్యాష్ ఉంటే, శుభ్రంగా ఉంచండి మరియు అవసరమైతే తేలికపాటి క్రీమ్ వాడండి. తీవ్రమైన ర్యాష్‌కు డాక్టర్‌ను సంప్రదించండి.";
+      return "వాంతులు ఉన్నప్పుడు, తగినంత నీరు త్రాగండి మరియు తేలికపాటి ఆహారం తీసుకోండి. తీవ్రమైన వాంతులు ఉంటే డాక్టర్‌ను సంప్రదించండి.";
     } else if (language === "kn") {
-      return "ಚರ್ಮದ ಮೇಲೆ ರ್ಯಾಶ್ ಇದ್ದರೆ, ಸ್ವಚ್ಛವಾಗಿರಿಸಿ ಮತ್ತು ಅಗತ್ಯವಿದ್ದರೆ ಸೌಮ್ಯ ಕ್ರಿಮ್ ಬಳಸಿ. ತೀವ್ರವಾದ ರ್ಯಾಶ್ಗೆ ವೈದ್ಯರನ್ನು ಸಂಪರ್ಕಿಸಿ.";
+      return "ಬೇಸರ ಅಥವಾ ವಾಂತಿ ಇದ್ದರೆ ಸಾಕಷ್ಟು ನೀರು ಕುಡಿಯಿರಿ ಮತ್ತು ಲಘು ಆಹಾರ ಸೇವಿಸಿ. ತೀವ್ರವಾದ ವಾಂತಿಗೆ ವೈದ್ಯರನ್ನು ಸಂಪರ್ಕಿಸಿ.";
     }
-    return "For skin rashes, keep the area clean and use mild cream if needed. For severe rashes, consult a doctor.";
+    return "For vomiting or nausea, drink water and eat light food. For severe vomiting, consult a doctor.";
   }
+
+  // Back pain
+  if (messageLower.includes("back pain")) {
+    if (language === "te") {
+      return "వెనుక నొప్పికి విశ్రాంతి తీసుకోండి మరియు తగినంత నీరు త్రాగండి. తీవ్రమైన నొప్పి ఉంటే డాక్టర్‌ను సంప్రదించండి.";
+    } else if (language === "kn") {
+      return "ಹಿಂದಿನ ನೋವಿಗೆ ವಿಶ್ರಾಂತಿ ಮಾಡಿ ಮತ್ತು ಸಾಕಷ್ಟು ನೀರು ಕುಡಿಯಿರಿ. ತೀವ್ರವಾದ ನೋವಿಗೆ ವೈದ್ಯರನ್నು ಸಂಪರ್ಕಿಸಿ.";
+    }
+    return "For back pain, rest and hydrate. For severe pain, consult a doctor.";
+  }
+
+  // Rash
+  if (messageLower.includes("rash") || messageLower.includes("skin irritation")) {
+    if (language === "te") {
+      return "చర్మంపై దద్దుర్లు ఉంటే, శుభ్రంగా ఉంచండి మరియు దురద నివారించండి. తీవ్రమైన దద్దుర్లు ఉంటే డాక్టర్‌ను సంప్రదించండి.";
+    } else if (language === "kn") {
+      return "ಚರ್ಮದ ಮೇಲೆ ದದ್ದು ಇದ್ದರೆ, ಸ್ವಚ್ಛವಾಗಿರಿಸಿ ಮತ್ತು ಉರಿ ತಪ್ಪಿಸಿ. ತೀವ್ರವಾದ ದದ್ದು ಇದ್ದರೆ ವೈದ್ಯರನ್ನು ಸಂಪರ್ಕಿಸಿ.";
+    }
+    return "For skin rashes, keep the area clean and avoid scratching. For severe rash, consult a doctor.";
+  }
+
+  // Dizziness
+  if (messageLower.includes("dizzy") || messageLower.includes("dizziness")) {
+    if (language === "te") {
+      return "తలనొప్పి లేదా తలనిప్పు ఉంటే, విశ్రాంతి తీసుకోండి మరియు తగినంత నీరు త్రాగండి. తీవ్రమైన తలనొప్పి ఉంటే డాక్టర్‌ను సంప్రదించండి.";
+    } else if (language === "kn") {
+      return "ತಲೆಸುತ್ತು ಇದ್ದರೆ, ವಿಶ್ರಾಂತಿ ಮಾಡಿ ಮತ್ತು ಸಾಕಷ್ಟು ನೀరು ಕುಡಿಯಿರಿ. ತೀವ್ರವಾದ ತಲೆಸುತ್ತಿಗೆ ವೈದ್ಯರನ್ನು ಸಂಪರ್ಕಿಸಿ.";
+    }
+    return "If you feel dizzy, rest and hydrate. For severe dizziness, consult a doctor.";
+  }
+
+  // Eye pain
+  if (messageLower.includes("eye pain") || messageLower.includes("eye irritation")) {
+    if (language === "te") {
+      return "కళ్ల నొప్పికి కళ్లను శుభ్రంగా ఉంచండి మరియు ఎక్కువగా రుద్దకుండా ఉండండి. తీవ్రమైన నొప్పి ఉంటే డాక్టర్‌ను సంప్రదించండి.";
+    } else if (language === "kn") {
+      return "ಕಣ್ಣಿನ ನೋವಿಗೆ ಕಣ್ಣುಗಳನ್ನು ಸ್ವಚ್ಛವಾಗಿರಿಸಿ ಮತ್ತು ಹೆಚ್ಚು ಒತ್ತಡ ನೀಡಬೇಡಿ. ತೀವ್ರವಾದ ನೋವಿಗೆ ವೈದ್ಯರನ್ನು ಸಂಪರ್ಕಿಸಿ.";
+    }
+    return "For eye pain, keep your eyes clean and avoid rubbing. For severe pain, consult a doctor.";
+  }
+
+  // Chest pain
+  if (messageLower.includes("chest pain")) {
+    if (language === "te") {
+      return "ఛాతీ నొప్పి తీవ్రమైనదైతే వెంటనే అత్యవసర సేవలను సంప్రదించండి. తక్కువ తీవ్రతの場合でも డాక్టర్‌ను సంప్రదించండి.";
+    } else if (language === "kn") {
+      return "ಛಾತಿ ನೋವು ತೀವ್ರವಾಗಿದ್ದರೆ ತಕ್ಷಣ ತುರ್ತು ಸೇವೆಯನ್ನು ಸಂಪರ್ಕಿಸಿ. ಕಡಿಮೆ ತೀವ್ರತೆ ಇದ್ದರೂ ವೈದ್ಯರನ್ನು ಸಂಪರ್ಕಿಸಿ.";
+    }
+    return "If you have severe chest pain, contact emergency services immediately. Even for mild pain, consult a doctor.";
+  }
+
+  // Default
   return null;
 }
 
