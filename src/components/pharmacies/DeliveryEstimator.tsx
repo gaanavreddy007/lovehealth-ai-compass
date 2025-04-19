@@ -1,105 +1,179 @@
-
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Clock, MapPin, Truck, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Truck } from "lucide-react";
 
 interface DeliveryEstimatorProps {
-  isOpen: boolean;
-  onClose: () => void;
-  pharmacyName: string;
-  distance: string;
+  onCalculate?: (data: {
+    pincode: string;
+    estimatedTime: string;
+    charge: string;
+    distance: string;
+  }) => void;
 }
 
-const DeliveryEstimator = ({ isOpen, onClose, pharmacyName, distance }: DeliveryEstimatorProps) => {
-  const [address, setAddress] = useState("");
-  const [isCalculating, setIsCalculating] = useState(false);
-  const [estimatedTime, setEstimatedTime] = useState<string | null>(null);
+const DeliveryEstimator = ({ onCalculate }: DeliveryEstimatorProps) => {
+  const [pincode, setPincode] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [calculatedData, setCalculatedData] = useState<{
+    estimatedTime: string;
+    charge: string;
+    distance: string;
+  } | null>(null);
+  
   const { toast } = useToast();
   
-  const handleEstimate = () => {
-    if (!address.trim()) {
+  // For demo purposes, we'll simulate the calculation
+  const calculateDelivery = () => {
+    if (!pincode || pincode.length !== 6 || !/^\d+$/.test(pincode)) {
       toast({
-        title: "Please enter delivery address",
+        title: "Invalid Pincode",
+        description: "Please enter a valid 6-digit pincode",
         variant: "destructive",
       });
       return;
     }
     
-    setIsCalculating(true);
+    setLoading(true);
     
-    // Simulate API call
+    // Simulate API call with a timeout
     setTimeout(() => {
-      // Calculate based on distance (just for demo)
-      const distanceNum = parseFloat(distance);
-      let time = "30-45 minutes";
+      // Generate random data based on pincode
+      const lastDigit = parseInt(pincode.slice(-1));
       
-      if (distanceNum < 2) {
-        time = "20-30 minutes";
-      } else if (distanceNum > 5) {
-        time = "45-60 minutes";
+      // Simulate different delivery times based on last digit
+      let estimatedTime, charge, distance;
+      
+      if (lastDigit < 3) {
+        // Nearby areas (fast delivery)
+        estimatedTime = "30-45 minutes";
+        charge = "₹35";
+        distance = "3.2 km";
+      } else if (lastDigit < 6) {
+        // Medium distance
+        estimatedTime = "45-60 minutes";
+        charge = "₹50";
+        distance = "5.8 km";
+      } else if (lastDigit < 9) {
+        // Farther distance
+        estimatedTime = "60-90 minutes";
+        charge = "₹75";
+        distance = "8.4 km";
+      } else {
+        // Remote areas
+        estimatedTime = "90-120 minutes";
+        charge = "₹100";
+        distance = "12.7 km";
       }
       
-      setEstimatedTime(time);
-      setIsCalculating(false);
-    }, 1500);
+      const result = { estimatedTime, charge, distance };
+      setCalculatedData(result);
+      
+      if (onCalculate) {
+        onCalculate({
+          pincode,
+          ...result
+        });
+      }
+      
+      setLoading(false);
+    }, 1500); // Simulate a 1.5s calculation process
   };
   
+  const resetCalculation = () => {
+    setPincode("");
+    setCalculatedData(null);
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Delivery Estimation</DialogTitle>
-          <DialogDescription>
-            Check estimated delivery time from {pharmacyName}
-          </DialogDescription>
-        </DialogHeader>
-        
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="delivery-address">Delivery Address</Label>
-            <Input 
-              id="delivery-address" 
-              placeholder="Enter your complete address" 
-              value={address} 
-              onChange={(e) => setAddress(e.target.value)}
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle className="flex items-center">
+          <Truck className="mr-2 h-5 w-5 text-ayurveda-sage" />
+          Medication Delivery Calculator
+        </CardTitle>
+        <CardDescription>
+          Check delivery time and charges for your location
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="pincode">Your Pincode</Label>
+          <div className="flex space-x-2">
+            <Input
+              id="pincode"
+              placeholder="Enter 6-digit pincode"
+              value={pincode}
+              onChange={(e) => setPincode(e.target.value)}
+              maxLength={6}
+              className="flex-1"
             />
+            <Button
+              onClick={calculateDelivery}
+              disabled={loading || !pincode}
+            >
+              {loading ? "Calculating..." : "Calculate"}
+            </Button>
           </div>
-          
-          <Button 
-            type="button" 
-            onClick={handleEstimate}
-            disabled={isCalculating}
-            className="w-full"
-          >
-            {isCalculating ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Calculating...
-              </>
-            ) : (
-              <>
-                <Truck className="mr-2 h-4 w-4" />
-                Calculate Delivery Time
-              </>
-            )}
-          </Button>
-          
-          {estimatedTime && (
-            <div className="p-4 bg-ayurveda-cream/20 rounded-md border border-ayurveda-cream/40 mt-4">
-              <h4 className="font-medium text-ayurveda-deepblue">Estimated Delivery Time</h4>
-              <p className="text-muted-foreground">{estimatedTime}</p>
-              <p className="text-xs text-muted-foreground/70 mt-2">
-                Actual delivery time may vary based on traffic conditions and pharmacy processing time.
-              </p>
-            </div>
-          )}
         </div>
-      </DialogContent>
-    </Dialog>
+        
+        {calculatedData && (
+          <div className="mt-6 rounded-lg border bg-card p-4 text-card-foreground shadow-sm relative">
+            <button 
+              onClick={resetCalculation}
+              className="absolute top-2 right-2 text-muted-foreground hover:text-foreground"
+              aria-label="Clear results"
+            >
+              <X className="h-4 w-4" />
+            </button>
+            
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <MapPin className="h-5 w-5 text-ayurveda-sage" />
+                <div>
+                  <p className="text-sm font-medium">Delivery Location</p>
+                  <p className="text-sm text-muted-foreground">Pincode: {pincode}</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Clock className="h-5 w-5 text-ayurveda-sage" />
+                <div>
+                  <p className="text-sm font-medium">Estimated Delivery Time</p>
+                  <p className="text-sm text-muted-foreground">{calculatedData.estimatedTime}</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Truck className="h-5 w-5 text-ayurveda-sage" />
+                <div>
+                  <p className="text-sm font-medium">Delivery Charge</p>
+                  <p className="text-sm text-muted-foreground">{calculatedData.charge} ({calculatedData.distance})</p>
+                </div>
+              </div>
+            </div>
+            
+            <Accordion type="single" collapsible className="mt-4">
+              <AccordionItem value="delivery-info">
+                <AccordionTrigger>Delivery Information</AccordionTrigger>
+                <AccordionContent>
+                  <div className="text-sm space-y-2 text-muted-foreground">
+                    <p>• Prescription medicines require a valid doctor's prescription</p>
+                    <p>• Orders placed after 8 PM might be delivered the next day</p>
+                    <p>• Payment can be made online or cash on delivery</p>
+                    <p>• Free delivery for orders above ₹500</p>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 

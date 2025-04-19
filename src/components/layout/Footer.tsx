@@ -1,4 +1,3 @@
-
 import { Heart } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -34,6 +33,7 @@ const Footer = () => {
               <li><Link to="/about" className="text-sm text-muted-foreground hover:text-ayurveda-deepblue transition-colors">About Ayu</Link></li>
               <li><Link to="/faq" className="text-sm text-muted-foreground hover:text-ayurveda-deepblue transition-colors">FAQ</Link></li>
               <li><Link to="/blog" className="text-sm text-muted-foreground hover:text-ayurveda-deepblue transition-colors">Health Blog</Link></li>
+              <li><Link to="/contact" className="text-sm text-muted-foreground hover:text-ayurveda-deepblue transition-colors">Contact Us</Link></li>
             </ul>
           </div>
           
@@ -49,7 +49,7 @@ const Footer = () => {
         
         <div className="border-t border-ayurveda-cream/50 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} LoveHealth AI. All rights reserved.
+            {new Date().getFullYear()} LoveHealth AI. All rights reserved.
           </p>
           <div className="flex items-center mt-4 md:mt-0">
             <p className="text-xs text-muted-foreground flex items-center">

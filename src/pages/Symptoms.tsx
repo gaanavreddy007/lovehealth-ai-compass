@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import AppLayout from "@/components/layout/AppLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,7 +13,7 @@ import {
 } from "lucide-react";
 
 const Symptoms = () => {
-  const [activeTab, setActiveTab] = useState("chat");
+  const [activeTab, setActiveTab] = useState<string>("chat");
 
   const commonSymptoms = [
     {
@@ -105,7 +104,7 @@ const Symptoms = () => {
           Get personalized guidance for common symptoms and learn when to seek professional help.
         </p>
         
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <Tabs defaultValue="chat" value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid grid-cols-2 w-full max-w-md mx-auto">
             <TabsTrigger value="chat">Chat with Ayu</TabsTrigger>
             <TabsTrigger value="guide">Common Symptoms</TabsTrigger>

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { CornerDownLeft, Smile, Paperclip, Image as ImageIcon } from "lucide-react";
+import { CornerDownLeft, Smile, Paperclip, Image as ImageIcon, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import AyuAvatar from "./AyuAvatar";
@@ -7,6 +7,10 @@ import AyuMessage from "./AyuMessage";
 import UserMessage from "./UserMessage";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import LanguageSelector from "@/components/auth/LanguageSelector";
+import { generateAIResponse, checkMedicalUrgency, getEmergencyResponse } from "@/lib/services/aiService";
+import { useAuth } from "@/lib/contexts/AuthContext";
+import { Language } from "@/lib/translations";
 
 interface Message {
   id: string;
@@ -16,110 +20,81 @@ interface Message {
 }
 
 const AyuChat = () => {
+  const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isAyuTyping, setIsAyuTyping] = useState(false);
   const [conversationContext, setConversationContext] = useState<string[]>([]);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [language, setLanguage] = useState<Language>(user?.language || "en");
+  const inputRef = useRef<HTMLInputElement>(null);
+  const scrollAreaViewportRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+
+  // Use user's preferred language if logged in
+  useEffect(() => {
+    if (user?.language) {
+      setLanguage(user.language);
+    }
+  }, [user]);
 
   // Initial greeting message
   useEffect(() => {
     setTimeout(() => {
       const greeting: Message = {
         id: "greeting",
-        content: "Namaste! I'm Ayu, your AI-powered Ayurvedic health companion. How can I assist you with your health today?",
+        content: getGreetingMessage(language),
         sender: "ayu",
         timestamp: new Date()
       };
       setMessages([greeting]);
     }, 1000);
-  }, []);
+  }, [language]);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
+  // Auto-scroll within the chat container only
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    if (scrollAreaViewportRef.current && messages.length > 0) {
+      const scrollElement = scrollAreaViewportRef.current;
+      scrollElement.scrollTop = scrollElement.scrollHeight;
+    }
+  }, [messages, isAyuTyping]);
 
-  const analyzeSymptoms = (message: string): string[] => {
-    const symptoms = [
-      'headache', 'fever', 'cough', 'cold', 'pain', 'tired', 'stress', 'anxiety',
-      'sleep', 'digestion', 'nausea', 'breathing', 'joint', 'muscle', 'skin'
-    ];
-    return symptoms.filter(symptom => message.toLowerCase().includes(symptom));
+  // Focus on input whenever needed
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, [isAyuTyping]);
+
+  // Get appropriate greeting based on language
+  const getGreetingMessage = (lang: Language): string => {
+    const greetings = {
+      en: "Hello! I'm Ayu, your health assistant. I can provide guidance on common symptoms and health concerns. How can I help you today?",
+      te: "నమస్కారం! నేను ఆయు, మీ ఆరోగ్య సహాయకుడిని. నేను సాధారణ లక్షణాలు మరియు ఆరోగ్య సమస్యలపై మార్గదర్శకత్వం అందించగలను. నేను మీకు ఈరోజు ఎలా సహాయం చేయగలను?",
+      kn: "ನಮಸ್ಕಾರ! ನಾನು ಆಯು, ನಿಮ್ಮ ಆರೋಗ್ಯ ಸಹಾಯಕ. ನಾನು ಸಾಮಾನ್ಯ ರೋಗಲಕ್ಷಣಗಳು ಮತ್ತು ಆರೋಗ್ಯ ಕಾಳಜಿಗಳ ಬಗ್ಗೆ ಮಾರ್ಗದರ್ಶನ ನೀಡಬಲ್ಲೆ. ಇಂದು ನಾನು ನಿಮಗೆ ಹೇಗೆ ಸಹಾಯ ಮಾಡಬಹುದು?"
+    };
+    return greetings[lang];
   };
 
-  const generateResponse = (userMessage: string): Promise<string> => {
-    return new Promise((resolve) => {
-      const lowerMessage = userMessage.toLowerCase();
-      const detectedSymptoms = analyzeSymptoms(userMessage);
-      
-      // Advanced response mapping with Ayurvedic context
-      const responseMap: { [key: string]: string[] } = {
-        'headache': [
-          "I notice you're experiencing a headache. In Ayurveda, headaches can be caused by imbalances in Vata (stress), Pitta (inflammation), or Kapha (congestion). Have you been experiencing any stress lately?",
-          "For headache relief, I recommend: 1) Massaging your temples with diluted peppermint oil 2) Drinking ginger tea with honey 3) Practicing deep breathing in a quiet, dark room. Would you like more specific remedies?",
-          "Besides the headache, are you experiencing any sensitivity to light or sound? This will help me understand if it's a Vata, Pitta, or Kapha imbalance."
-        ],
-        'fever': [
-          "A fever is your body's natural defense mechanism. From an Ayurvedic perspective, this indicates a Pitta (heat) imbalance. Are you also experiencing thirst or warmth in your body?",
-          "I recommend: 1) Drinking cooling herbs like holy basil (tulsi) tea 2) Light fasting or easily digestible foods 3) Rest and meditation. Would you like me to elaborate on any of these?",
-          "Have you noticed any patterns with your fever, like does it increase at certain times of the day? This could help us understand the underlying dosha imbalance."
-        ],
-        'tired': [
-          "Fatigue in Ayurveda often indicates an imbalance in your vital energy (prana). Could you tell me about your sleep patterns and daily routine?",
-          "Consider these Ayurvedic recommendations: 1) Taking Ashwagandha supplement 2) Oil pulling in the morning 3) Practicing gentle yoga. Would you like a detailed routine?",
-          "Is your fatigue worse at certain times of day? This could help us identify which dosha needs balancing."
-        ],
-        'stress': [
-          "Stress in Ayurveda is often related to Vata imbalance. Let's work on grounding practices. How long have you been feeling this way?",
-          "Here are some immediate Ayurvedic stress-relief practices: 1) Abhyanga (self-massage) with warm sesame oil 2) Pranayama breathing 3) Drinking warm milk with nutmeg before bed. Shall we explore these further?",
-          "Are you also experiencing any physical symptoms with the stress? This will help me suggest more targeted remedies."
-        ]
-      };
+  // Handle input changes
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInput(e.target.value);
+  };
 
-      // Context-aware fallback responses
-      const fallbackResponses = [
-        "I'm analyzing your symptoms through an Ayurvedic lens. Could you tell me more about when these symptoms started?",
-        "In Ayurveda, we look at the whole person, not just symptoms. How's your daily routine and diet been lately?",
-        "Understanding your prakriti (body constitution) will help me give better advice. Do you typically run warm or cool?",
-        "Let's explore your symptoms together. Are they worse at any particular time of day?",
-        "Ayurveda teaches us that health is a balance of mind, body, and spirit. How's your emotional well-being lately?"
-      ];
-
-      // Build contextual response
-      let response: string;
-      if (detectedSymptoms.length > 0) {
-        const relevantResponses = detectedSymptoms
-          .map(symptom => responseMap[symptom])
-          .filter(Boolean)
-          .flat();
-        
-        response = relevantResponses.length > 0
-          ? relevantResponses[Math.floor(Math.random() * relevantResponses.length)]
-          : fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
-      } else {
-        response = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
-      }
-
-      // Add conversation memory
-      setConversationContext(prev => [...prev, userMessage]);
-      
-      // Simulate AI processing time
-      setTimeout(() => {
-        resolve(response);
-      }, 1500);
-    });
+  const handleLanguageChange = (newLanguage: Language) => {
+    setLanguage(newLanguage);
+    
+    // If user is logged in, update their preference
+    if (user) {
+      toast({
+        title: "Language preference saved",
+        description: "Your language preference has been updated",
+        duration: 2000,
+      });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
     
-    // Add user message
     const userMessage: Message = {
       id: Date.now().toString(),
       content: input,
@@ -130,22 +105,64 @@ const AyuChat = () => {
     setMessages(prev => [...prev, userMessage]);
     setInput("");
     
-    // Show Ayu typing indicator
     setIsAyuTyping(true);
     
     try {
-      // Get AI response
-      const response = await generateResponse(input);
+      // Check if this might be a medical emergency
+      if (checkMedicalUrgency(input)) {
+        // Add emergency response
+        const emergencyMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          content: getEmergencyResponse(language),
+          sender: "ayu",
+          timestamp: new Date()
+        };
+        
+        // Short delay to simulate thinking
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        setMessages(prev => [...prev, emergencyMessage]);
+        setIsAyuTyping(false);
+        return;
+      }
       
-      // Add Ayu message
-      const ayuMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        content: response,
-        sender: "ayu",
-        timestamp: new Date()
-      };
+      // Add new message to conversation context for future AI responses
+      const updatedContext = [...conversationContext, input];
+      setConversationContext(updatedContext);
       
-      setMessages(prev => [...prev, ayuMessage]);
+      // Use AI service to generate response
+      const aiResponse = await generateAIResponse(
+        input, 
+        updatedContext,
+        language
+      );
+      
+      if (aiResponse.success) {
+        const ayuMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          content: aiResponse.text,
+          sender: "ayu",
+          timestamp: new Date()
+        };
+        
+        setMessages(prev => [...prev, ayuMessage]);
+      } else {
+        // If there was an error, show toast and error message in chat
+        toast({
+          title: "AI Service Error",
+          description: "Could not connect to AI service. Showing fallback response.",
+          variant: "destructive"
+        });
+        
+        const errorMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          content: aiResponse.text,
+          sender: "ayu",
+          timestamp: new Date()
+        };
+        
+        setMessages(prev => [...prev, errorMessage]);
+      }
     } catch (error) {
       toast({
         title: "Error",
@@ -157,19 +174,38 @@ const AyuChat = () => {
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (input.trim()) {
+        handleSubmit(e as unknown as React.FormEvent);
+      }
+    }
+  };
+
   return (
     <div className="flex flex-col h-full border rounded-xl shadow-sm overflow-hidden bg-white/50 backdrop-blur-sm">
-      {/* Chat header */}
-      <div className="p-4 border-b bg-white/80 backdrop-blur-sm flex items-center space-x-3">
-        <AyuAvatar size="sm" />
-        <div>
-          <h3 className="font-medium">Ayu</h3>
-          <p className="text-xs text-muted-foreground">Your Health Companion</p>
+      <div className="p-4 border-b bg-white/80 backdrop-blur-sm flex items-center justify-between">
+        <div className="flex items-center space-x-3">
+          <AyuAvatar size="sm" />
+          <div>
+            <h3 className="font-medium">Ayu</h3>
+            <p className="text-xs text-muted-foreground">Your Health Companion</p>
+          </div>
+        </div>
+        <div className="flex items-center">
+          <LanguageSelector 
+            currentLanguage={language}
+            onLanguageChange={handleLanguageChange}
+          />
         </div>
       </div>
       
-      {/* Messages area */}
-      <ScrollArea className="flex-1 p-4">
+      <div 
+        className="flex-1 p-4 overflow-y-auto"
+        ref={scrollAreaViewportRef}
+        style={{ height: '100%', maxHeight: 'calc(100% - 130px)' }}
+      >
         <div className="space-y-4">
           {messages.map((message) => (
             message.sender === "ayu" ? (
@@ -191,21 +227,30 @@ const AyuChat = () => {
               </div>
             </div>
           )}
-          
-          <div ref={messagesEndRef} />
         </div>
-      </ScrollArea>
+      </div>
       
-      {/* Input area */}
-      <form onSubmit={handleSubmit} className="border-t p-4 bg-white/60 backdrop-blur-sm">
+      <form 
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSubmit(e);
+        }} 
+        className="border-t p-4 bg-white/60 backdrop-blur-sm"
+      >
         <div className="flex space-x-2">
           <Input
+            ref={inputRef}
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
             placeholder="Type your health concern..."
             className="flex-1"
           />
-          <Button type="submit" size="icon">
+          <Button 
+            type="button" 
+            onClick={(e) => handleSubmit(e as unknown as React.FormEvent)} 
+            size="icon"
+          >
             <CornerDownLeft size={18} />
           </Button>
         </div>

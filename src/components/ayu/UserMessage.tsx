@@ -1,21 +1,21 @@
-
-import { cn } from "@/lib/utils";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import React from "react";
+import { User } from "lucide-react";
 
 interface UserMessageProps {
   content: string;
-  className?: string;
 }
 
-const UserMessage = ({ content, className }: UserMessageProps) => {
+const UserMessage: React.FC<UserMessageProps> = ({ content }) => {
   return (
-    <div className={cn("flex items-start space-x-3 justify-end animate-fade-in", className)}>
-      <div className="bg-ayurveda-deepblue text-white rounded-l-xl rounded-br-xl px-4 py-3 max-w-[80%]">
-        {content}
+    <div className="flex items-start justify-end">
+      <div className="bg-ayurveda-deepblue text-white rounded-2xl rounded-br-sm px-4 py-3 max-w-[85%]">
+        <div className="text-sm whitespace-pre-wrap">{content}</div>
       </div>
-      <Avatar className="h-8 w-8 bg-ayurveda-terracotta/70">
-        <AvatarFallback>U</AvatarFallback>
-      </Avatar>
+      <div className="flex-shrink-0 ml-3 mt-0.5">
+        <div className="h-8 w-8 rounded-full bg-ayurveda-terracotta/20 flex items-center justify-center">
+          <User className="h-4 w-4 text-ayurveda-terracotta" />
+        </div>
+      </div>
     </div>
   );
 };

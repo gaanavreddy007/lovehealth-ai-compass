@@ -1,7 +1,8 @@
-
-import { useState } from "react";
+import React, { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface SymptomCardProps {
@@ -9,7 +10,8 @@ interface SymptomCardProps {
   description: string;
   remedies: string[];
   whenToSeeDoctor: string;
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
+  className?: string;
 }
 
 const SymptomCard = ({
@@ -18,54 +20,85 @@ const SymptomCard = ({
   remedies,
   whenToSeeDoctor,
   icon,
+  className,
 }: SymptomCardProps) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className={cn(
-      "ayu-card p-6",
-      "transform transition-all duration-300",
-      isExpanded ? "scale-[1.02]" : ""
-    )}>
-      <div className="flex items-start justify-between">
-        <div className="flex items-center">
-          <div className="mr-3 p-3 bg-ayurveda-sage/10 rounded-full text-ayurveda-sage">
-            {icon}
+    <Card className={cn("overflow-hidden", className)}>
+      <CardHeader className="bg-gradient-to-r from-ayurveda-sage/10 to-transparent">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            {icon && <div className="text-ayurveda-deepblue">{icon}</div>}
+            <CardTitle className="text-xl text-ayurveda-deepblue">{title}</CardTitle>
           </div>
-          <h3 className="text-lg font-medium text-ayurveda-deepblue">{title}</h3>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setExpanded(!expanded)}
+            aria-label={expanded ? "Collapse" : "Expand"}
+          >
+            {expanded ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+          </Button>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="text-ayurveda-deepblue hover:text-ayurveda-terracotta hover:bg-ayurveda-cream/20"
-        >
-          {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-        </Button>
-      </div>
-
-      <div className={cn(
-        "overflow-hidden transition-all duration-300",
-        isExpanded ? "max-h-[500px] opacity-100 mt-4" : "max-h-0 opacity-0"
-      )}>
+      </CardHeader>
+      <CardContent className="pb-6 pt-4">
         <p className="text-muted-foreground mb-4">{description}</p>
-        
-        <h4 className="font-medium text-ayurveda-deepblue mb-2">Home Remedies:</h4>
-        <ul className="space-y-1 mb-4">
-          {remedies.map((remedy, index) => (
-            <li key={index} className="flex items-start">
-              <span className="text-ayurveda-terracotta mr-2">•</span>
-              <span className="text-muted-foreground">{remedy}</span>
-            </li>
-          ))}
-        </ul>
-        
-        <div className="bg-red-50 p-3 rounded-lg border border-red-100">
-          <h4 className="font-medium text-red-700 mb-1">When to See a Doctor:</h4>
-          <p className="text-red-600 text-sm">{whenToSeeDoctor}</p>
-        </div>
-      </div>
-    </div>
+
+        {expanded && (
+          <>
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-lg font-medium text-ayurveda-terracotta mb-2">
+                  Home Remedies
+                </h3>
+                <div className="space-y-2">
+                  {remedies.map((remedy, index) => (
+                    <div key={index} className="bg-muted/50 p-3 rounded-md">
+                      <p className="text-sm text-muted-foreground">{remedy}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <Separator className="my-4" />
+
+              <div>
+                <h3 className="text-lg font-medium text-red-600 mb-2">
+                  When to See a Doctor
+                </h3>
+                <div className="bg-red-50 p-3 rounded-md border border-red-100">
+                  <p className="text-sm text-red-700">{whenToSeeDoctor}</p>
+                </div>
+                
+                <div className="mt-4 bg-amber-50 p-3 rounded-md border border-amber-100">
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                    <p className="text-xs text-amber-700">
+                      <strong>Medical Disclaimer:</strong> The information provided here is for educational purposes only and is not a substitute for professional medical advice. Always consult with a healthcare provider for diagnosis and treatment.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        {!expanded && (
+          <Button
+            variant="link"
+            onClick={() => setExpanded(true)}
+            className="text-ayurveda-sage p-0 h-auto font-normal"
+          >
+            Click to see home remedies and when to see a doctor
+          </Button>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 

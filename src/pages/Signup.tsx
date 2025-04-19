@@ -5,22 +5,29 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import LanguageSelector from "@/components/auth/LanguageSelector";
 import { translations } from "@/lib/translations";
-import { login } from "@/lib/services/authService";
 import { useToast } from "@/hooks/use-toast";
 import { Heart } from "lucide-react";
+import { Language } from "@/lib/translations";
 
-export default function Login() {
+export default function Signup() {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [language, setLanguage] = useState<"en" | "te" | "kn">("en");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [language, setLanguage] = useState<Language>("en");
   const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{ name?: string; email?: string; password?: string; confirmPassword?: string }>({});
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const validateForm = () => {
-    const newErrors: { email?: string; password?: string } = {};
+    const newErrors: { name?: string; email?: string; password?: string; confirmPassword?: string } = {};
     let isValid = true;
+
+    if (!name) {
+      newErrors.name = "Name is required";
+      isValid = false;
+    }
 
     if (!email) {
       newErrors.email = "Email is required";
@@ -38,11 +45,19 @@ export default function Login() {
       isValid = false;
     }
 
+    if (!confirmPassword) {
+      newErrors.confirmPassword = "Please confirm your password";
+      isValid = false;
+    } else if (password !== confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match";
+      isValid = false;
+    }
+
     setErrors(newErrors);
     return isValid;
   };
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) {
@@ -52,27 +67,19 @@ export default function Login() {
     setIsLoading(true);
     
     try {
-      const response = await login(email, password);
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
       
-      if (response.success) {
-        toast({
-          title: "Login successful",
-          description: `Welcome back, ${response.user?.name}!`,
-          duration: 3000,
-        });
-        
-        // Navigate to home page after successful login
-        navigate("/");
-      } else {
-        toast({
-          title: "Login failed",
-          description: response.message || "Invalid email or password",
-          variant: "destructive",
-          duration: 5000,
-        });
-      }
+      toast({
+        title: "Account created",
+        description: "Your account has been successfully created. Please log in.",
+        duration: 3000,
+      });
+      
+      // Navigate to login page after successful signup
+      navigate("/login");
     } catch (error) {
-      console.error("Login error:", error);
+      console.error("Signup error:", error);
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
@@ -86,12 +93,6 @@ export default function Login() {
 
   const t = translations[language];
 
-  // For demo purposes, show login credentials
-  const handleDemoLogin = (demoEmail: string) => {
-    setEmail(demoEmail);
-    setPassword("password123");
-  };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-ayurveda-sage/20 to-ayurveda-terracotta/20">
       <Card className="w-full max-w-md mx-4">
@@ -102,7 +103,7 @@ export default function Login() {
                 <Heart className="text-white h-4 w-4" />
               </div>
               <CardTitle className="text-2xl font-bold text-ayurveda-deepblue">
-                {t.loginTitle}
+                Create Account
               </CardTitle>
             </div>
             <LanguageSelector
@@ -112,12 +113,27 @@ export default function Login() {
           </div>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleSignup} className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">{t.emailLabel}</label>
+              <label className="text-sm font-medium">Full Name</label>
+              <Input
+                type="text"
+                placeholder="Enter your full name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                disabled={isLoading}
+                className={errors.name ? "border-red-500" : ""}
+              />
+              {errors.name && (
+                <p className="text-xs text-red-500 mt-1">{errors.name}</p>
+              )}
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Email</label>
               <Input
                 type="email"
-                placeholder={t.emailPlaceholder}
+                placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
@@ -127,16 +143,12 @@ export default function Login() {
                 <p className="text-xs text-red-500 mt-1">{errors.email}</p>
               )}
             </div>
+            
             <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <label className="text-sm font-medium">{t.passwordLabel}</label>
-                <Link to="/forgot-password" className="text-xs text-ayurveda-deepblue hover:underline">
-                  {t.forgotPassword}
-                </Link>
-              </div>
+              <label className="text-sm font-medium">Password</label>
               <Input
                 type="password"
-                placeholder={t.passwordPlaceholder}
+                placeholder="Create a password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
@@ -146,50 +158,59 @@ export default function Login() {
                 <p className="text-xs text-red-500 mt-1">{errors.password}</p>
               )}
             </div>
+            
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Confirm Password</label>
+              <Input
+                type="password"
+                placeholder="Confirm your password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                disabled={isLoading}
+                className={errors.confirmPassword ? "border-red-500" : ""}
+              />
+              {errors.confirmPassword && (
+                <p className="text-xs text-red-500 mt-1">{errors.confirmPassword}</p>
+              )}
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Preferred Language</label>
+              <div className="mt-1">
+                <LanguageSelector
+                  currentLanguage={language}
+                  onLanguageChange={setLanguage}
+                />
+              </div>
+            </div>
+            
             <Button 
               type="submit" 
               className="w-full bg-ayurveda-deepblue hover:bg-ayurveda-deepblue/90"
               disabled={isLoading}
             >
-              {isLoading ? "Signing in..." : t.loginButton}
+              {isLoading ? "Creating Account..." : "Create Account"}
             </Button>
           </form>
           
           <div className="mt-6 pt-4 border-t border-gray-200">
-            <p className="text-sm text-center text-muted-foreground mb-3">Demo accounts (password: password123)</p>
-            <div className="grid grid-cols-3 gap-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => handleDemoLogin("user@example.com")}
-                className="text-xs"
-              >
-                English
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => handleDemoLogin("telugu@example.com")}
-                className="text-xs"
-              >
-                Telugu
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => handleDemoLogin("kannada@example.com")}
-                className="text-xs"
-              >
-                Kannada
-              </Button>
-            </div>
+            <p className="text-sm text-center text-muted-foreground">
+              By creating an account, you agree to our{" "}
+              <Link to="/terms" className="text-ayurveda-deepblue hover:underline">
+                Terms of Service
+              </Link>{" "}
+              and{" "}
+              <Link to="/privacy" className="text-ayurveda-deepblue hover:underline">
+                Privacy Policy
+              </Link>
+            </p>
           </div>
         </CardContent>
         <CardFooter className="flex justify-center">
           <p className="text-sm text-muted-foreground">
-            Don't have an account?{" "}
-            <Link to="/signup" className="text-ayurveda-deepblue hover:underline">
-              Sign Up
+            Already have an account?{" "}
+            <Link to="/login" className="text-ayurveda-deepblue hover:underline">
+              Sign In
             </Link>
           </p>
         </CardFooter>

@@ -1,73 +1,123 @@
-# Welcome to your Lovable project
+# LoveHealth AI Compass
 
-## Project info
+LoveHealth AI Compass is a health assistant platform featuring Ayu, an AI health companion designed for Bengaluru residents. The application blends modern healthcare with traditional wisdom to provide personalized health guidance.
 
-**URL**: https://lovable.dev/projects/d0ccc255-0f0a-4d23-bf55-2ee2475a986c
+## Features
 
-## How can I edit this code?
+- **Symptom Guide**: Get personalized health guidance with traditional and modern remedies for common ailments
+- **Healthcare Provider Finder**: Find the right hospitals and specialists across Bengaluru neighborhoods
+- **Pharmacy Locator**: Locate nearby pharmacies with operating hours and medication delivery services
+- **Multilingual Support**: Available in English, Telugu, and Kannada
+- **User Authentication**: Personalized experience with user accounts and preferences
 
-There are several ways of editing your application.
+## Technologies Used
 
-**Use Lovable**
+- **Frontend**: React, TypeScript, Vite
+- **UI Components**: shadcn/ui, Tailwind CSS
+- **State Management**: React Context API, React Query
+- **AI Integration**: OpenAI API for health guidance
+- **Authentication**: Local storage-based authentication (demo)
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/d0ccc255-0f0a-4d23-bf55-2ee2475a986c) and start prompting.
+## Getting Started
 
-Changes made via Lovable will be committed automatically to this repo.
+### Prerequisites
 
-**Use your preferred IDE**
+- Node.js (v16 or higher)
+- npm or yarn package manager
+- OpenAI API key (for AI chat functionality)
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Installation
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
+1. Clone the repository:
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+git clone https://github.com/yourusername/lovehealth-ai-compass.git
+cd lovehealth-ai-compass
 ```
 
-**Edit a file directly in GitHub**
+2. Install dependencies:
+```sh
+npm install
+# or
+yarn install
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+3. Create a `.env` file in the root directory with your OpenAI API key:
+```
+VITE_OPENAI_API_KEY=your_openai_api_key_here
+```
 
-**Use GitHub Codespaces**
+4. Start the development server:
+```sh
+npm run dev
+# or
+yarn dev
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+5. Open your browser and navigate to `http://localhost:5173`
 
-## What technologies are used for this project?
+## Demo Accounts
 
-This project is built with:
+For testing purposes, you can use the following demo accounts:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- **English User**: 
+  - Email: user@example.com
+  - Password: password123
 
-## How can I deploy this project?
+- **Telugu User**: 
+  - Email: telugu@example.com
+  - Password: password123
 
-Simply open [Lovable](https://lovable.dev/projects/d0ccc255-0f0a-4d23-bf55-2ee2475a986c) and click on Share -> Publish.
+- **Kannada User**: 
+  - Email: kannada@example.com
+  - Password: password123
 
-## Can I connect a custom domain to my Lovable project?
+## Project Structure
 
-Yes, you can!
+```
+lovehealth-ai-compass/
+├── public/               # Static assets
+├── src/
+│   ├── components/       # Reusable UI components
+│   │   ├── ayu/          # Ayu-specific components
+│   │   ├── auth/         # Authentication components
+│   │   ├── layout/       # Layout components
+│   │   ├── symptoms/     # Symptom-related components
+│   │   └── ui/           # shadcn/ui components
+│   ├── hooks/            # Custom React hooks
+│   ├── lib/
+│   │   ├── contexts/     # React contexts
+│   │   └── services/     # API services
+│   ├── pages/            # Application pages
+│   ├── App.tsx           # Main application component
+│   └── main.tsx          # Application entry point
+├── .env                  # Environment variables (local)
+├── .env.example          # Example environment variables
+└── package.json          # Project dependencies
+```
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## Deployment
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+To deploy this application:
+
+1. Build the production version:
+```sh
+npm run build
+# or
+yarn build
+```
+
+2. The build output will be in the `dist` directory, which can be deployed to any static hosting service like Netlify, Vercel, or GitHub Pages.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+- This project was built with [Lovable](https://lovable.dev/projects/d0ccc255-0f0a-4d23-bf55-2ee2475a986c)
+- UI components from [shadcn/ui](https://ui.shadcn.com/)
+- Icons from [Lucide React](https://lucide.dev/)
